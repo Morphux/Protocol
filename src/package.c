@@ -204,6 +204,166 @@ static size_t           read_payload_get_upd(package_t *pkg, void *data) {
     return count;
 }
 
+static size_t           read_payload_resp_pkg(package_t *pkg, void *data) {
+    size_t      count = 0;
+    resp_pkg_t      *resp;
+
+    resp = malloc(sizeof(resp_pkg_t));
+    assert(resp != NULL);
+
+    read_member(resp->id);
+    read_member(resp->comp_time);
+    read_member(resp->inst_size);
+    read_member(resp->arch_size);
+    read_member(resp->state);
+    read_member(resp->name_len);
+    read_member(resp->category_len);
+    read_member(resp->version_len);
+    read_member(resp->archive_len);
+    read_member(resp->checksum_len);
+    read_member(resp->dependencies_size);
+
+    if (resp->name_len != 0) {
+        resp->name = malloc(sizeof(char) * resp->name_len);
+        assert(resp->name);
+        read_string(resp->name, resp->name_len);
+    } else {
+        resp->name = NULL;
+    }
+
+    if (resp->category_len != 0) {
+        resp->category = malloc(sizeof(char *) * resp->category_len);
+        assert(resp->category);
+        read_string(resp->category, resp->category_len);
+    } else {
+        resp->category = NULL;
+    }
+
+    if (resp->version_len != 0) {
+        resp->version = malloc(sizeof(char) * resp->version_len);
+        assert(resp->version);
+        read_string(resp->version, resp->version_len);
+    } else {
+        resp->version = NULL;
+    }
+
+    if (resp->archive_len != 0) {
+        resp->archive = malloc(sizeof(char *) * resp->archive_len);
+        assert(resp->archive);
+        read_string(resp->archive, resp->archive_len);
+    } else {
+        resp->archive = NULL;
+    }
+
+    if (resp->checksum_len != 0) {
+        resp->checksum = malloc(sizeof(char *) * resp->checksum_len);
+        assert(resp->checksum);
+        read_string(resp->checksum, resp->checksum_len);
+    } else {
+        resp->checksum = NULL;
+    }
+
+    if (resp->dependencies_size != 0) {
+        resp->dependencies = malloc(sizeof(*resp->dependencies) * resp->dependencies_size);
+        assert(resp->dependencies);
+        memcpy(resp->dependencies, data + count, sizeof(*resp->dependencies) * resp->dependencies_size);
+        count += sizeof(*resp->dependencies) * resp->dependencies_size;
+    } else {
+        resp->dependencies = NULL;
+    }
+
+    list_add(pkg->payload, resp, sizeof(resp_pkg_t));
+    return count;
+}
+
+static size_t           read_payload_resp_file(package_t *pkg, void *data) {
+    size_t      count = 0;
+    resp_file_t *resp;
+
+    resp = malloc(sizeof(resp_file_t));
+    assert(resp != NULL);
+
+    read_member(resp->id);
+    read_member(resp->type);
+    read_member(resp->parent_id);
+    read_member(resp->path_len);
+
+    if (resp->path_len != 0) {
+        resp->path = malloc(sizeof(char) * resp->path_len);
+        assert(resp->path != NULL);
+        read_string(resp->path, resp->path_len);
+    } else {
+        resp->path = NULL;
+    }
+
+    list_add(pkg->payload, resp, sizeof(resp_file_t));
+    return count;
+}
+
+static size_t           read_payload_resp_news(package_t *pkg, void *data) {
+    size_t      count = 0;
+    resp_news_t *resp;
+
+    resp = malloc(sizeof(resp_news_t));
+    assert(resp != NULL);
+
+    read_member(resp->id);
+    read_member(resp->parent_id);
+    read_member(resp->author_len);
+    read_member(resp->author_mail_len);
+    read_member(resp->text_len);
+
+    if (resp->author_len != 0) {
+        resp->author = malloc(sizeof(char) * resp->author_len);
+        assert(resp->author != NULL);
+        read_string(resp->author, resp->author_len);
+    } else {
+        resp->author = NULL;
+    }
+
+    if (resp->author_mail_len != 0) {
+        resp->author_mail = malloc(sizeof(char) * resp->author_mail_len);
+        assert(resp->author_mail != NULL);
+        read_string(resp->author_mail, resp->author_mail_len);
+    } else {
+        resp->author_mail = NULL;
+    }
+
+    if (resp->text_len != 0) {
+        resp->text = malloc(sizeof(char *) * resp->text_len);
+        assert(resp->text != NULL);
+        read_string(resp->text, resp->text_len);
+    } else {
+        resp->text = NULL;
+    }
+
+    list_add(pkg->payload, resp, sizeof(resp_news_t));
+    return count;
+}
+
+static size_t           read_payload_resp_cat(package_t *pkg, void *data) {
+    size_t      count = 0;
+    resp_cat_t  *resp;
+
+    resp = malloc(sizeof(resp_cat_t));
+    assert(resp != NULL);
+
+    read_member(resp->id);
+    read_member(resp->parent_id);
+    read_member(resp->name_len);
+
+    if (resp->name_len != 0) {
+        resp->name = malloc(sizeof(char) * resp->name_len);
+        assert(resp->name != NULL);
+        read_string(resp->name, resp->name_len);
+    } else {
+        resp->name = NULL;
+    }
+
+    list_add(pkg->payload, resp, sizeof(resp_cat_t));
+    return count;
+}
+
 typedef     size_t      (*payload_callback)(package_t *, void *);
 static const     payload_callback arr[] = {
     &read_payload_auth,
@@ -214,6 +374,10 @@ static const     payload_callback arr[] = {
     &read_payload_get_news,
     &read_payload_get_cat,
     &read_payload_get_upd,
+    &read_payload_resp_pkg,
+    &read_payload_resp_file,
+    &read_payload_resp_news,
+    &read_payload_resp_cat,
     NULL
 };
 
