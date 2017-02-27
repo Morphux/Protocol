@@ -1,6 +1,5 @@
 #include "package.h"
 
-
 static size_t                read_header(package_t *pkg, void *data) {
     size_t      count = 0;
 
@@ -377,8 +376,7 @@ static const     payload_callback arr[] = {
     &read_payload_resp_pkg,
     &read_payload_resp_file,
     &read_payload_resp_news,
-    &read_payload_resp_cat,
-    NULL
+    &read_payload_resp_cat
 };
 
 static size_t   read_payload(package_t *pkg, void *data) {
