@@ -4,6 +4,11 @@
 # include <morphux.h>
 # include "protocol_test.h"
 
+# define read_member(mem) memcpy(&(mem), data + count, sizeof(mem)); \
+                            count += sizeof(mem);
+# define read_string(mem, len) memcpy(mem, data + count, len); \
+                            count += len;
+
 /* Header */
 typedef struct      package_s {
     u8_t        type;

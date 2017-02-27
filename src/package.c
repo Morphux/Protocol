@@ -4,17 +4,16 @@
 static size_t                read_header(package_t *pkg, void *data) {
     size_t      count = 0;
 
-    memcpy(&pkg->type, data + count, sizeof(pkg->type));
-    count += sizeof(pkg->type);
-    memcpy(&pkg->size, data + count, sizeof(pkg->size));
-    count += sizeof(pkg->size);
-    memcpy(&pkg->next_pkg_len, data + count, sizeof(pkg->next_pkg_len));
-    count += sizeof(pkg->next_pkg_len);
+    read_member(pkg->type);
+    read_member(pkg->size);
+    read_member(pkg->next_pkg_len);
 
     if (pkg->next_pkg_len != 0) {
         pkg->next_pkg = malloc(sizeof(char) * pkg->next_pkg_len);
-        memcpy(pkg->next_pkg, data + count, pkg->next_pkg_len);
-        count += pkg->next_pkg_len;
+        assert(pkg->next_pkg != NULL);
+        read_string(pkg->next_pkg, pkg->next_pkg_len);
+    } else {
+        pkg->next_pkg = NULL;
     }
     return count;
 }
@@ -31,10 +30,10 @@ static size_t       read_payload_auth(package_t *pkg, void *data) {
 
     auth = malloc(sizeof(auth_t));
     assert(auth != NULL);
-    memcpy(&auth->mpm_major_version, data + count, sizeof(auth->mpm_major_version));
-    count += sizeof(auth->mpm_major_version);
-    memcpy(&auth->mpm_minor_version, data + count, sizeof(auth->mpm_minor_version));
-    count += sizeof(auth->mpm_minor_version);
+
+    read_member(auth->mpm_major_version);
+    read_member(auth->mpm_minor_version);
+
     list_add(pkg->payload, auth, sizeof(auth_t));
     return count;
 }
@@ -45,10 +44,10 @@ static size_t       read_payload_auth_ack(package_t *pkg, void *data) {
 
     auth = malloc(sizeof(auth_t));
     assert(auth != NULL);
-    memcpy(&auth->mpm_major_version, data + count, sizeof(auth->mpm_major_version));
-    count += sizeof(auth->mpm_major_version);
-    memcpy(&auth->mpm_minor_version, data + count, sizeof(auth->mpm_minor_version));
-    count += sizeof(auth->mpm_minor_version);
+
+    read_member(auth->mpm_major_version);
+    read_member(auth->mpm_minor_version);
+
     list_add(pkg->payload, auth, sizeof(auth_ack_t));
     return count;
 }
@@ -59,15 +58,18 @@ static size_t       read_payload_error(package_t *pkg, void *data) {
 
     err = malloc(sizeof(error_t));
     assert(err != NULL);
-    memcpy(&err->error_type, data + count, sizeof(err->error_type));
-    count += sizeof(err->error_type);
-    memcpy(&err->error_len, data + count, sizeof(err->error_len));
-    count += sizeof(err->error_len);
 
-    err->err = malloc(sizeof(char) * err->error_len);
-    assert(err->err != NULL);
-    memcpy(err->err, data + count, err->error_len);
-    count += err->error_len;
+    read_member(err->error_type);
+    read_member(err->error_len);
+
+    if (err->error_len) {
+        err->err = malloc(sizeof(char) * err->error_len);
+        assert(err->err != NULL);
+        read_string(err->err, err->error_len);
+    } else {
+        err->err = NULL;
+    }
+
     list_add(pkg->payload, err, sizeof(error_t));
     return count;
 }
@@ -79,25 +81,126 @@ static size_t       read_payload_get_package(package_t *pkg, void *data) {
     req = malloc(sizeof(req_get_pkg_t));
     assert(req != NULL);
 
-    memcpy(&req->id, data + count, sizeof(req->id));
-    count += sizeof(req->id);
-    memcpy(&req->state, data + count, sizeof(req->state));
-    count += sizeof(req->state);
-    memcpy(&req->name_len, data + count, sizeof(req->name_len));
-    count += sizeof(req->name_len);
-    memcpy(&req->categ_len, data + count, sizeof(req->categ_len));
-    count += sizeof(req->categ_len);
-    memcpy(&req->version_len, data + count, sizeof(req->version_len));
-    count += sizeof(req->version_len);
+    read_member(req->id);
+    read_member(req->state);
+    read_member(req->name_len);
+    read_member(req->categ_len);
+    read_member(req->version_len);
 
-    memcpy(req->name, data + count, req->name_len);
-    count += req->name_len;
-    memcpy(req->category, data + count, req->categ_len);
-    count += req->categ_len;
-    memcpy(req->version, data + count, req->version_len);
-    count += req->version_len;
+    if (req->name_len != 0) {
+        req->name = malloc(sizeof(char) * req->name_len);
+        assert(req->name != NULL);
+        read_string(req->name, req->name_len);
+    } else {
+        req->name = NULL;
+    }
+
+    if (req->categ_len != 0) {
+        req->category = malloc(sizeof(char) * req->categ_len);
+        assert(req->category != NULL);
+        read_string(req->category, req->categ_len);
+    } else {
+        req->category = NULL;
+    }
+
+    if (req->version_len != 0) {
+        req->version = malloc(sizeof(char) * req->version_len);
+        assert(req->version != NULL);
+        read_string(req->version, req->version_len);
+    } else {
+        req->version = NULL;
+    }
 
     list_add(pkg->payload, req, sizeof(req_get_pkg_t));
+    return count;
+}
+
+static size_t           read_payload_get_file(package_t *pkg, void *data) {
+    size_t      count = 0;
+    req_get_file_t  *req;
+
+    req = malloc(sizeof(req_get_file_t));
+    assert(req != NULL);
+
+    read_member(req->id);
+    read_member(req->path_len);
+
+    if (req->path_len != 0) {
+        req->path = malloc(sizeof(char) * req->path_len);
+        assert(req->path);
+        read_string(req->path, req->path_len);
+    } else {
+        req->path = NULL;
+    }
+
+    list_add(pkg->payload, req, sizeof(req_get_file_t));
+    return count;
+}
+
+static size_t           read_payload_get_news(package_t *pkg, void *data) {
+    size_t      count = 0;
+    req_get_news_t  *req;
+
+    req = malloc(sizeof(req_get_news_t));
+    assert(req != NULL);
+
+    read_member(req->last_request);
+    read_member(req->pkgs_ids_size);
+
+    if (req->pkgs_ids_size != 0) {
+        req->pkgs_ids = malloc(sizeof(*req->pkgs_ids) * req->pkgs_ids_size);
+        assert(req->pkgs_ids);
+        memcpy(req->pkgs_ids, data + count, sizeof(*req->pkgs_ids) * req->pkgs_ids_size);
+        count += sizeof(*req->pkgs_ids) * req->pkgs_ids_size;
+    } else {
+        req->pkgs_ids = NULL;
+    }
+
+    list_add(pkg->payload, req, sizeof(req_get_news_t));
+    return count;
+}
+
+static size_t           read_payload_get_cat(package_t *pkg, void *data) {
+    size_t      count = 0;
+    req_get_cat_t   *req;
+
+    req = malloc(sizeof(req_get_cat_t));
+    assert(req != NULL);
+
+    read_member(req->cat_len);
+
+    if (req->cat_len != 0) {
+        req->categories = malloc(sizeof(*req->categories) * req->cat_len);
+        assert(req->categories);
+        memcpy(req->categories, data + count, sizeof(*req->categories) * req->cat_len);
+        count += sizeof(*req->categories) * req->cat_len;
+    } else {
+        req->categories = NULL;
+    }
+
+    list_add(pkg->payload, req, sizeof(req_get_cat_t));
+    return count;
+}
+
+static size_t           read_payload_get_upd(package_t *pkg, void *data) {
+    size_t      count = 0;
+    req_get_upd_t   *req;
+
+    req = malloc(sizeof(sizeof(req_get_upd_t)));
+    assert(req != NULL);
+
+    read_member(req->pkg_len);
+
+    if (req->pkg_len != 0) {
+        req->packages = malloc(sizeof(*req->packages) * req->pkg_len);
+        assert(req->packages);
+        memcpy(req->packages, data + count, sizeof(*req->packages) * req->pkg_len);
+        count += sizeof(*req->packages) * req->pkg_len;
+    } else {
+        req->packages = NULL;
+    }
+
+    list_add(pkg->payload, req, sizeof(req_get_upd_t));
     return count;
 }
 
@@ -107,6 +210,10 @@ static const     payload_callback arr[] = {
     &read_payload_auth_ack,
     &read_payload_error,
     &read_payload_get_package,
+    &read_payload_get_file,
+    &read_payload_get_news,
+    &read_payload_get_cat,
+    &read_payload_get_upd,
     NULL
 };
 
