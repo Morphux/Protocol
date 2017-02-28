@@ -12,8 +12,10 @@
 # define write_member(mem, data, count) memcpy(data + count, &mem, sizeof(mem)); \
                             count += sizeof(mem);
 
-# define write_string(mem, data, len, count) memcpy(data + count, mem, len); \
-                            count += len;
+# define write_string(mem, data, len, count) if (mem != NULL) { \
+                                memcpy(data + count, mem, len); \
+                                count += len; \
+                                }
 
 /* Header */
 typedef struct      package_s {
