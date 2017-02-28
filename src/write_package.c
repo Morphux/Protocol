@@ -80,12 +80,27 @@ static void     *write_payload_req_get_pkg(void *pkg, size_t *count) {
     return ret;
 }
 
+static void     *write_payload_req_get_file(void *pkg, size_t *count) {
+    req_get_file_t      *req = pkg;
+    void                *ret;
+
+    ret = malloc(sizeof(req->id) + sizeof(req->path_len) + req->path_len);
+    assert(ret != NULL);
+
+    write_member(req->id, ret, *count);
+    write_member(req->path_len, ret, *count);
+    write_string(req->path, ret, req->path_len, *count);
+
+    return ret;
+}
+
 typedef     void      *(*write_callback)(void *, size_t *);
 static const        write_callback arr[] = {
     &write_payload_auth,
     &write_payload_auth_ack,
     &write_payload_error,
-    &write_payload_req_get_pkg
+    &write_payload_req_get_pkg,
+    &write_payload_req_get_file
 };
 
 void        *write_payload(package_t *pkg, size_t *count) {
