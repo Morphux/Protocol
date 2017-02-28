@@ -59,11 +59,33 @@ static void     *write_payload_error(void *pkg, size_t *count) {
     return ret;
 }
 
+static void     *write_payload_req_get_pkg(void *pkg, size_t *count) {
+    req_get_pkg_t   *req = pkg;
+    void            *ret;
+
+    ret = malloc(sizeof(req->id) + sizeof(req->state) + sizeof(req->name_len)
+            + sizeof(req->categ_len) + sizeof(req->version_len)
+            + req->name_len + req->categ_len + req->version_len);
+    assert(req != NULL);
+
+    write_member(req->id, ret, *count);
+    write_member(req->state, ret, *count);
+    write_member(req->name_len, ret, *count);
+    write_member(req->categ_len, ret, *count);
+    write_member(req->version_len, ret, *count);
+    write_string(req->name, ret, req->name_len, *count);
+    write_string(req->category, ret, req->categ_len, *count);
+    write_string(req->version, ret, req->version_len, *count);
+
+    return ret;
+}
+
 typedef     void      *(*write_callback)(void *, size_t *);
 static const        write_callback arr[] = {
     &write_payload_auth,
     &write_payload_auth_ack,
-    &write_payload_error
+    &write_payload_error,
+    &write_payload_req_get_pkg
 };
 
 void        *write_payload(package_t *pkg, size_t *count) {
