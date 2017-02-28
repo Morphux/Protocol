@@ -45,11 +45,25 @@ static void     *write_payload_auth_ack(void *pkg, size_t *count) {
     return ret;
 }
 
+static void     *write_payload_error(void *pkg, size_t *count) {
+    error_t     *err = pkg;
+    void        *ret;
+
+    ret = malloc(sizeof(err->error_type) + sizeof(err->error_len) + err->error_len);
+    assert(ret != NULL);
+
+    write_member(err->error_type, ret, *count);
+    write_member(err->error_len, ret, *count);
+    write_string(err->err, ret, err->error_len, *count);
+
+    return ret;
+}
 
 typedef     void      *(*write_callback)(void *, size_t *);
 static const        write_callback arr[] = {
     &write_payload_auth,
-    &write_payload_auth_ack
+    &write_payload_auth_ack,
+    &write_payload_error
 };
 
 void        *write_payload(package_t *pkg, size_t *count) {
