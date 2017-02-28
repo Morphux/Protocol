@@ -33,10 +33,23 @@ static void     *write_payload_auth(void *pkg, size_t *count) {
     return ret;
 }
 
+static void     *write_payload_auth_ack(void *pkg, size_t *count) {
+    auth_ack_t      *auth = pkg;
+    void            *ret;
+
+    ret = malloc(sizeof(auth_ack_t));
+    assert(ret != NULL);
+
+    write_member(auth->mpm_major_version, ret, *count);
+    write_member(auth->mpm_minor_version, ret, *count);
+    return ret;
+}
+
 
 typedef     void      *(*write_callback)(void *, size_t *);
 static const        write_callback arr[] = {
-    &write_payload_auth
+    &write_payload_auth,
+    &write_payload_auth_ack
 };
 
 void        *write_payload(package_t *pkg, size_t *count) {
