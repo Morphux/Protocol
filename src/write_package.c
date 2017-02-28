@@ -112,6 +112,21 @@ static void     *write_payload_req_get_news(void *pkg, size_t *count) {
     return ret;
 }
 
+static void     *write_payload_req_get_cat(void *pkg, size_t *count) {
+    req_get_cat_t       *req = pkg;
+    void                *ret;
+
+    ret = malloc(sizeof(req->cat_len) + (sizeof(*req->categories) * req->cat_len));
+    assert(ret != NULL);
+
+    write_member(req->cat_len, ret, *count);
+    for (u16_t i = 0; i < req->cat_len; i++) {
+        memcpy(ret + *count, &(req->categories[i]), sizeof(*req->categories));
+        *count += sizeof(*req->categories);
+    }
+    return ret;
+}
+
 typedef     void      *(*write_callback)(void *, size_t *);
 static const        write_callback arr[] = {
     &write_payload_auth,
@@ -119,7 +134,8 @@ static const        write_callback arr[] = {
     &write_payload_error,
     &write_payload_req_get_pkg,
     &write_payload_req_get_file,
-    &write_payload_req_get_news
+    &write_payload_req_get_news,
+    &write_payload_req_get_cat
 };
 
 void        *write_payload(package_t *pkg, size_t *count) {
