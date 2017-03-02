@@ -191,6 +191,23 @@ static void     *write_payload_resp_pkg(void *pkg, size_t *count) {
     return ret;
 }
 
+static void     *write_payload_resp_file(void *pkg, size_t *count) {
+    resp_file_t     *resp = pkg;
+    void            *ret;
+
+    ret = malloc(sizeof(resp->id) + sizeof(resp->type) + sizeof(resp->parent_id) + 
+            sizeof(resp->path_len) + resp->path_len);
+    assert(pkg != ret);
+
+    write_member(resp->id, ret, *count);
+    write_member(resp->type, ret, *count);
+    write_member(resp->parent_id, ret, *count);
+    write_member(resp->path_len, ret, *count);
+    write_string(resp->path, ret, resp->path_len, *count);
+
+    return ret;
+}
+
 typedef     void      *(*write_callback)(void *, size_t *);
 static const        write_callback arr[] = {
     &write_payload_auth,
@@ -201,7 +218,8 @@ static const        write_callback arr[] = {
     &write_payload_req_get_news,
     &write_payload_req_get_cat,
     &write_payload_req_get_upd,
-    &write_payload_resp_pkg
+    &write_payload_resp_pkg,
+    &write_payload_resp_file
 };
 
 void        *write_payload(package_t *pkg, size_t *count) {
