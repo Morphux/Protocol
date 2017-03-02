@@ -142,6 +142,55 @@ static void     *write_payload_req_get_upd(void *pkg, size_t *count) {
     return ret;
 }
 
+static void     *write_payload_resp_pkg(void *pkg, size_t *count) {
+    resp_pkg_t      *resp = pkg;
+    void            *ret;
+
+    ret = malloc(sizeof(resp->id) +
+            sizeof(resp->comp_time) +
+            sizeof(resp->inst_size) +
+            sizeof(resp->arch_size) +
+            sizeof(resp->state) +
+            sizeof(resp->name_len) +
+            sizeof(resp->category_len) +
+            sizeof(resp->version_len) +
+            sizeof(resp->archive_len) +
+            sizeof(resp->checksum_len) +
+            sizeof(resp->dependencies_size) +
+            resp->name_len +
+            resp->category_len +
+            resp->version_len +
+            resp->archive_len +
+            resp->checksum_len +
+            sizeof(resp->dependencies_size) * sizeof(*resp->dependencies)
+        );
+    assert(ret != NULL);
+    write_member(resp->id, ret, *count);
+    write_member(resp->comp_time, ret, *count);
+    write_member(resp->inst_size, ret, *count);
+    write_member(resp->arch_size, ret, *count);
+    write_member(resp->state, ret, *count);
+    write_member(resp->name_len, ret, *count);
+    write_member(resp->category_len, ret, *count);
+    write_member(resp->version_len, ret, *count);
+    write_member(resp->archive_len, ret, *count);
+    write_member(resp->checksum_len, ret, *count);
+    write_member(resp->dependencies_size, ret, *count);
+
+    write_string(resp->name, ret, resp->name_len, *count);
+    write_string(resp->category, ret, resp->category_len, *count);
+    write_string(resp->version, ret, resp->version_len, *count);
+    write_string(resp->archive, ret, resp->archive_len, *count);
+    write_string(resp->checksum, ret, resp->checksum_len, *count);
+
+    for (u16_t i = 0; i < resp->dependencies_size; i++) {
+        memcpy(ret + *count, &resp->dependencies[i], sizeof(resp->dependencies[i]));
+        *count += sizeof(resp->dependencies[i]);
+    }
+
+    return ret;
+}
+
 typedef     void      *(*write_callback)(void *, size_t *);
 static const        write_callback arr[] = {
     &write_payload_auth,
@@ -151,7 +200,8 @@ static const        write_callback arr[] = {
     &write_payload_req_get_file,
     &write_payload_req_get_news,
     &write_payload_req_get_cat,
-    &write_payload_req_get_upd
+    &write_payload_req_get_upd,
+    &write_payload_resp_pkg
 };
 
 void        *write_payload(package_t *pkg, size_t *count) {
