@@ -229,6 +229,22 @@ static void     *write_payload_resp_news(void *pkg, size_t *count) {
     return ret;
 }
 
+static void     *write_payload_resp_cat(void *pkg, size_t *count) {
+    resp_cat_t      *resp = pkg;
+    void            *ret;
+
+    ret = malloc(sizeof(resp->id) + sizeof(resp->parent_id) + sizeof(resp->name_len)
+            + resp->name_len);
+    assert(ret != NULL);
+
+    write_member(resp->id, ret, *count);
+    write_member(resp->parent_id, ret, *count);
+    write_member(resp->name_len, ret, *count);
+    write_string(resp->name, ret, resp->name_len, *count);
+
+    return ret;
+}
+
 typedef     void      *(*write_callback)(void *, size_t *);
 static const        write_callback arr[] = {
     &write_payload_auth,
@@ -241,7 +257,8 @@ static const        write_callback arr[] = {
     &write_payload_req_get_upd,
     &write_payload_resp_pkg,
     &write_payload_resp_file,
-    &write_payload_resp_news
+    &write_payload_resp_news,
+    &write_payload_resp_cat
 };
 
 void        *write_payload(package_t *pkg, size_t *count) {
