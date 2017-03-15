@@ -46,7 +46,7 @@ static void     *write_payload_auth_ack(void *pkg, size_t *count) {
 }
 
 static void     *write_payload_error(void *pkg, size_t *count) {
-    error_t     *err = pkg;
+    error_pkg_t *err = pkg;
     void        *ret;
 
     ret = malloc(sizeof(err->error_type) + sizeof(err->error_len) + err->error_len);

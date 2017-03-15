@@ -53,9 +53,9 @@ static size_t       read_payload_auth_ack(package_t *pkg, void *data) {
 
 static size_t       read_payload_error(package_t *pkg, void *data) {
     size_t      count = 0;
-    error_t     *err;
+    error_pkg_t *err;
 
-    err = malloc(sizeof(error_t));
+    err = malloc(sizeof(error_pkg_t));
     assert(err != NULL);
 
     read_member(err->error_type);
@@ -69,7 +69,7 @@ static size_t       read_payload_error(package_t *pkg, void *data) {
         err->err = NULL;
     }
 
-    list_add(pkg->payload, err, sizeof(error_t));
+    list_add(pkg->payload, err, sizeof(error_pkg_t));
     return count;
 }
 

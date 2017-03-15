@@ -56,11 +56,11 @@ typedef struct       auth_ack_s {
     u8_t        mpm_minor_version;
 }          SF_PACKED auth_ack_t;
 
-typedef struct      error_s {
+typedef struct      error_pkg_s {
     u8_t        error_type;
     u16_t       error_len;
     char        *err;
-}          SF_PACKED error_t;
+}          SF_PACKED error_pkg_t;
 
 /* Error possible types */
 typedef enum        error_type_e {
@@ -156,5 +156,7 @@ typedef struct      resp_cat_s {
     u16_t       name_len;
     char        *name;
 }         SF_PACKED resp_cat_t;
+
+void        *write_package(package_t *pkg, size_t *size);
 
 #endif /* PACKAGE_H */
