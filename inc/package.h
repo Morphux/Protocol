@@ -158,5 +158,6 @@ typedef struct      resp_cat_s {
 }         SF_PACKED resp_cat_t;
 
 void        *write_package(package_t *pkg, size_t *size);
+void *pkg_build_auth(size_t *size, int major_version, int minor_version);
 
 #endif /* PACKAGE_H */

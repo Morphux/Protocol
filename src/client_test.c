@@ -23,20 +23,11 @@ TEST(connect_1) {
 }
 
 TEST(pkg_auth_1) {
-    package_t       *pkg;
     size_t          size;
-    auth_t          *auth;
     void            *ret;
 
     TEST_ASSERT(sockfd, "Server is not responding");
-    auth = malloc(sizeof(auth_t));
-    auth->mpm_major_version = 1;
-    auth->mpm_minor_version = 1;
-    pkg = malloc(sizeof(pkg));
-    pkg->type = PKG_TYPE_AUTH;
-    pkg->next_pkg_len = 0;
-    list_add(pkg->payload, auth, sizeof(auth_t));
-    ret = write_package(pkg, &size);
+    ret = pkg_build_auth(&size, 0, 1);
     TEST_ASSERT(write(sockfd, ret, size) != 0,
         "Cannot send package to the server");
     return TEST_SUCCESS;

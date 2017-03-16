@@ -280,6 +280,8 @@ void        *write_package(package_t *pkg, size_t *size) {
     void    *header, *payload, *ret;
     size_t  header_size = 0, payload_size = 0;
 
+    pkg->size = 0;
+    pkg->next_pkg_len = 0;
     header = write_header(pkg, &header_size);
     payload = write_payload(pkg, &payload_size);
 
