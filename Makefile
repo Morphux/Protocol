@@ -1,6 +1,6 @@
 NAME =		protocol_tests
 CC =		gcc
-CFLAGS = 	-Wall -Werror -Wextra -Wno-unused-result -I inc/ -I lib/inc/ -g -O3
+CFLAGS = 	-Wall -Werror -Wextra -Wno-unused-result -I inc/ -I lib/inc/ -g -O3 -std=c99
 LFLAGS = 	-Llib/ -lmorphux
 SRCS = 		$(wildcard src/*.c)
 OBJS =		$(SRCS:%.c=%.o)
