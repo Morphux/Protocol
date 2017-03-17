@@ -34,14 +34,20 @@ TEST(pkg_auth_1_write) {
 }
 
 TEST(pkg_auth_1_read) {
-    void        *ret;
+    void        *ret, *expect;
     package_t   *pkg;
+    size_t      r_n = 0, size;
 
     TEST_ASSERT(sockfd, "Server is not responding");
+    expect = pkg_build_auth(&size, 1, 0);
     ret = malloc(2048);
-    read(sockfd, ret, 2048);
+    r_n = read(sockfd, ret, 2048);
+
+    TEST_ASSERT(r_n == size, "Package returned size is wrong");
+    TEST_ASSERT(memcmp(ret, expect, size) == 0, "Expected package is wrong");
     pkg = read_pkg(ret);
     TEST_ASSERT(pkg, "Can't read package");
+    TEST_ASSERT(pkg->type == PKG_TYPE_AUTH_ACK, "Package type is wrong");
     return TEST_SUCCESS;
 }
 
