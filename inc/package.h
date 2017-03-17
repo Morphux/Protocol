@@ -29,19 +29,19 @@ typedef struct      package_s {
 
 /* Type field of the header */
 typedef enum        package_type_e {
-    PKG_TYPE_AUTH = 0,
-    PKG_TYPE_AUTH_ACK,
-    PKG_TYPE_ERROR,
-    PKG_TYPE_REQ_GET_PKG,
-    PKG_TYPE_REQ_GET_FILE,
-    PKG_TYPE_REQ_GET_NEWS,
-    PKG_TYPE_REQ_CAT,
-    PKG_TYPE_REQ_UPD,
-    PKG_TYPE_RESP_PKG,
-    PKG_TYPE_RESP_FILE,
-    PKG_TYPE_RESP_NEWS,
-    PKG_TYPE_RESP_CAT,
-    PKG_TYPE_END
+    PKG_TYPE_AUTH = 0x1,
+    PKG_TYPE_AUTH_ACK = 0x2,
+    PKG_TYPE_ERROR = 0x3,
+    PKG_TYPE_REQ_GET_PKG = 0x10,
+    PKG_TYPE_REQ_GET_FILE = 0x11,
+    PKG_TYPE_REQ_GET_NEWS = 0x12,
+    PKG_TYPE_REQ_CAT = 0x13,
+    PKG_TYPE_REQ_UPD = 0x14,
+    PKG_TYPE_RESP_PKG = 0x20,
+    PKG_TYPE_RESP_FILE = 0x21,
+    PKG_TYPE_RESP_NEWS = 0x22,
+    PKG_TYPE_RESP_CAT = 0x23,
+    PKG_TYPE_END = 0x24
 }                   package_type_t;
 
 /* Payloads */

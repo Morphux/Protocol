@@ -2,7 +2,6 @@
 
 static void *write_header(package_t *pkg, size_t *count) {
     void    *header;
-    u8_t    tmp;
 
     *count = 0;
     header = malloc(sizeof(pkg->type) + 
@@ -12,8 +11,7 @@ static void *write_header(package_t *pkg, size_t *count) {
                     pkg->next_pkg_len);
     assert(header != NULL);
 
-    tmp = pkg->type + 1;
-    write_member(tmp, header, *count);
+    write_member(pkg->type, header, *count);
     write_member(pkg->size, header, *count);
     write_member(pkg->next_pkg_len, header, *count);
     if (pkg->next_pkg_len != 0) {
@@ -248,29 +246,42 @@ static void     *write_payload_resp_cat(void *pkg, size_t *count) {
 }
 
 typedef     void      *(*write_callback)(void *, size_t *);
-static const        write_callback arr[] = {
-    &write_payload_auth,
-    &write_payload_auth_ack,
-    &write_payload_error,
-    &write_payload_req_get_pkg,
-    &write_payload_req_get_file,
-    &write_payload_req_get_news,
-    &write_payload_req_get_cat,
-    &write_payload_req_get_upd,
-    &write_payload_resp_pkg,
-    &write_payload_resp_file,
-    &write_payload_resp_news,
-    &write_payload_resp_cat
+typedef     struct callback_s {
+    u8_t             index;
+    write_callback   fn;
+} callback_t;
+
+static const        callback_t arr[] = {
+    {PKG_TYPE_AUTH, &write_payload_auth},
+    {PKG_TYPE_AUTH_ACK, &write_payload_auth_ack},
+    {PKG_TYPE_ERROR, &write_payload_error},
+    {PKG_TYPE_REQ_GET_PKG, &write_payload_req_get_pkg},
+    {PKG_TYPE_REQ_GET_FILE, &write_payload_req_get_file},
+    {PKG_TYPE_REQ_GET_NEWS, &write_payload_req_get_news},
+    {PKG_TYPE_REQ_CAT, &write_payload_req_get_cat},
+    {PKG_TYPE_REQ_UPD, &write_payload_req_get_upd},
+    {PKG_TYPE_RESP_PKG, &write_payload_resp_pkg},
+    {PKG_TYPE_RESP_FILE, &write_payload_resp_file},
+    {PKG_TYPE_RESP_NEWS, &write_payload_resp_news},
+    {PKG_TYPE_RESP_CAT, &write_payload_resp_cat}
 };
 
 void        *write_payload(package_t *pkg, size_t *count) {
     mlist_t *tmp;
     void    *ptr, *payl_tmp, *ret = NULL;
-    size_t  size;
+    size_t  size, index;
 
     list_for_each(pkg->payload, tmp, ptr) {
         size = 0;
-        payl_tmp = arr[pkg->type](ptr, &size);
+        for (index = 0; index < sizeof(arr) / sizeof(arr[0]); index++)
+        {
+            if (pkg->type == arr[index].index)
+            {
+                payl_tmp = arr[index].fn(ptr, &size);
+                break ;
+            }
+        }
+        assert(index != sizeof(arr) / sizeof(arr[0]));
         *count += size;
         ret = realloc(ret, *count);
         memcpy(ret + (*count - size), payl_tmp, size);

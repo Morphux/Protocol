@@ -4,7 +4,6 @@ static size_t                read_header(package_t *pkg, void *data) {
     size_t      count = 0;
 
     read_member(pkg->type);
-    pkg->type--;
     read_member(pkg->size);
     read_member(pkg->next_pkg_len);
 
@@ -365,23 +364,35 @@ static size_t           read_payload_resp_cat(package_t *pkg, void *data) {
 }
 
 typedef     size_t      (*payload_callback)(package_t *, void *);
-static const     payload_callback arr[] = {
-    &read_payload_auth,
-    &read_payload_auth_ack,
-    &read_payload_error,
-    &read_payload_get_package,
-    &read_payload_get_file,
-    &read_payload_get_news,
-    &read_payload_get_cat,
-    &read_payload_get_upd,
-    &read_payload_resp_pkg,
-    &read_payload_resp_file,
-    &read_payload_resp_news,
-    &read_payload_resp_cat
+typedef     struct callback_s {
+    u8_t               index;
+    payload_callback   fn;
+} callback_t;
+
+static const        callback_t arr[] = {
+    {PKG_TYPE_AUTH, &read_payload_auth},
+    {PKG_TYPE_AUTH_ACK, &read_payload_auth_ack},
+    {PKG_TYPE_ERROR, &read_payload_error},
+    {PKG_TYPE_REQ_GET_PKG, &read_payload_get_package},
+    {PKG_TYPE_REQ_GET_FILE, &read_payload_get_file},
+    {PKG_TYPE_REQ_GET_NEWS, &read_payload_get_news},
+    {PKG_TYPE_REQ_CAT, &read_payload_get_cat},
+    {PKG_TYPE_REQ_UPD, &read_payload_get_upd},
+    {PKG_TYPE_RESP_PKG, &read_payload_resp_pkg},
+    {PKG_TYPE_RESP_FILE, &read_payload_resp_file},
+    {PKG_TYPE_RESP_NEWS, &read_payload_resp_news},
+    {PKG_TYPE_RESP_CAT, &read_payload_resp_cat}
 };
 
 static size_t   read_payload(package_t *pkg, void *data) {
-    return arr[pkg->type](pkg, data);
+    size_t      index;
+
+    for (index = 0; index < sizeof(arr) / sizeof(arr[0]); index++)
+    {
+        if (pkg->type == arr[index].index)
+            return arr[index].fn(pkg, data);
+    }
+    return 0;
 }
 
 package_t      *read_pkg(void *data) {
