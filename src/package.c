@@ -107,3 +107,20 @@ void *pkg_build_req_get_news(size_t *size, time_t last_request, u16_t ids_size,
     list_add(pkg->payload, news, SIZEOF_REQ_GET_NEWS(news));
     return write_package(pkg, size);
 }
+
+void *pkg_build_req_get_cat(size_t *size, u16_t len, u64_t *a_cat) {
+    req_get_cat_t       *cat;
+    package_t           *pkg;
+
+    cat = malloc(sizeof(req_get_cat_t));
+    cat->cat_len = len;
+    cat->categories = malloc(sizeof(*a_cat) * len);
+    memcpy(cat->categories, a_cat, sizeof(*a_cat) * len);
+
+    pkg = malloc(sizeof(package_t));
+    pkg->type = PKG_TYPE_REQ_CAT;
+    pkg->payload = NULL;
+    pkg->number = 1;
+    list_add(pkg->payload, cat, SIZEOF_REQ_GET_CAT(cat));
+    return write_package(pkg, size);
+}

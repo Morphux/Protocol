@@ -119,6 +119,8 @@ typedef struct      req_get_cat_s {
     u64_t       *categories;
 }         SF_PACKED req_get_cat_t;
 
+# define SIZEOF_REQ_GET_CAT(cat) (sizeof(cat->cat_len) + sizeof(*cat->categories) * cat->cat_len)
+
 typedef struct      req_get_upd_s {
     u64_t       pkg_len;
     u64_t       *packages;
@@ -180,5 +182,6 @@ void *pkg_build_req_get_pkg(size_t *size, u64_t id, u8_t state, const char *name
 void *pkg_build_req_get_file(size_t *size, u64_t id, const char *path);
 void *pkg_build_req_get_news(size_t *size, time_t last_request, u16_t ids_size, 
                                 u64_t *ids);
+void *pkg_build_req_get_cat(size_t *size, u16_t len, u64_t *a_cat);
 
 #endif /* PACKAGE_H */
