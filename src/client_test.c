@@ -48,6 +48,7 @@ TEST(pkg_auth_1_read) {
     pkg = read_pkg(ret);
     TEST_ASSERT(pkg, "Can't read package");
     TEST_ASSERT(pkg->type == PKG_TYPE_AUTH_ACK, "Package type is wrong");
+    free(ret);
     return TEST_SUCCESS;
 }
 

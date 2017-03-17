@@ -31,3 +31,43 @@ void *pkg_build_auth_ack(size_t *size, int major_version, int minor_version) {
     ret = write_package(pkg, size);
     return ret;
 }
+
+void *pkg_build_error(size_t *size, error_type_t type, const char *error) {
+    error_pkg_t     *err;
+    package_t       *pkg;
+
+    err = malloc(sizeof(error_pkg_t));
+    err->error_type = type;
+    err->error_len = strlen(error);
+    err->err = strdup(error);
+
+    pkg = malloc(sizeof(package_t));
+    pkg->type = PKG_TYPE_ERROR;
+    pkg->payload = NULL;
+    pkg->number = 1;
+    list_add(pkg->payload, err, SIZEOF_ERR(err));
+    return write_package(pkg, size);
+}
+
+void *pkg_build_req_get_pkg(size_t *size, u64_t id, u8_t state, const char *name, 
+            const char *category, const char *version) {
+    req_get_pkg_t       *req;
+    package_t           *pkg;
+
+    req = malloc(sizeof(req_get_pkg_t));
+    req->id = id;
+    req->state = state;
+    req->name_len = strlen(name);
+    req->categ_len = strlen(category);
+    req->version_len = strlen(version);
+    req->name = strdup(name);
+    req->category = strdup(category);
+    req->version = strdup(version);
+
+    pkg = malloc(sizeof(package_t));
+    pkg->type = PKG_TYPE_REQ_GET_PKG;
+    pkg->payload = NULL;
+    pkg->number = 1;
+    list_add(pkg->payload, req, SIZEOF_REQ_GET_PKG(req));
+    return write_package(pkg, size);
+}

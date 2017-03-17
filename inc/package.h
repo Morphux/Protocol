@@ -62,6 +62,9 @@ typedef struct      error_pkg_s {
     char        *err;
 }          SF_PACKED error_pkg_t;
 
+# define SIZEOF_ERR(err) (sizeof(err->error_type) + sizeof(err->error_len) \
+                            + err->error_len)
+
 /* Error possible types */
 typedef enum        error_type_e {
     ERR_SERVER_FAULT = 1,
@@ -80,6 +83,11 @@ typedef struct      req_get_pkg_s {
     char        *category;
     char        *version;
 }          SF_PACKED req_get_pkg_t;
+
+# define SIZEOF_REQ_GET_PKG(pkg) (sizeof(pkg->id) + sizeof(pkg->state) + \
+                                    sizeof(pkg->name_len) + sizeof(pkg->categ_len) + \
+                                    sizeof(pkg->version_len) + pkg->name_len + pkg->categ_len + \
+                                    pkg->version_len)
 
 /* Stability of packages */
 typedef enum        package_state_e {
@@ -161,5 +169,6 @@ void        *write_package(package_t *pkg, size_t *size);
 package_t      *read_pkg(void *data);
 void *pkg_build_auth(size_t *size, int major_version, int minor_version);
 void *pkg_build_auth_ack(size_t *size, int major_version, int minor_version);
+void *pkg_build_error(size_t *size, error_type_t type, const char *error);
 
 #endif /* PACKAGE_H */
