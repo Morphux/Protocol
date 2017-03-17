@@ -71,3 +71,20 @@ void *pkg_build_req_get_pkg(size_t *size, u64_t id, u8_t state, const char *name
     list_add(pkg->payload, req, SIZEOF_REQ_GET_PKG(req));
     return write_package(pkg, size);
 }
+
+void *pkg_build_req_get_file(size_t *size, u64_t id, const char *path) {
+    req_get_file_t      *file;
+    package_t           *pkg;
+
+    file = malloc(sizeof(req_get_file_t));
+    file->id = id;
+    file->path_len = strlen(path);
+    file->path = strdup(path);
+
+    pkg = malloc(sizeof(package_t));
+    pkg->type = PKG_TYPE_REQ_GET_FILE;
+    pkg->payload = NULL;
+    pkg->number = 1;
+    list_add(pkg->payload, file, SIZEOF_REQ_GET_FILE(file));
+    return write_package(pkg, size);
+}

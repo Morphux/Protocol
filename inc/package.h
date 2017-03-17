@@ -103,6 +103,8 @@ typedef struct      req_get_file_s {
     char        *path;
 }         SF_PACKED req_get_file_t;
 
+# define SIZEOF_REQ_GET_FILE(file) (sizeof(file->id) + sizeof(file->path_len) + file->path_len)
+
 typedef struct      req_get_news_s {
     time_t      last_request;
     u16_t       pkgs_ids_size;
@@ -170,5 +172,7 @@ package_t      *read_pkg(void *data);
 void *pkg_build_auth(size_t *size, int major_version, int minor_version);
 void *pkg_build_auth_ack(size_t *size, int major_version, int minor_version);
 void *pkg_build_error(size_t *size, error_type_t type, const char *error);
+void *pkg_build_req_get_pkg(size_t *size, u64_t id, u8_t state, const char *name, 
+void *pkg_build_req_get_file(size_t *size, u64_t id, const char *path) {
 
 #endif /* PACKAGE_H */
