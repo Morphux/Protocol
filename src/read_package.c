@@ -4,6 +4,7 @@ static size_t                read_header(package_t *pkg, void *data) {
     size_t      count = 0;
 
     read_member(pkg->type);
+    printf("%d\n", pkg->type);
     read_member(pkg->size);
     read_member(pkg->next_pkg_len);
 

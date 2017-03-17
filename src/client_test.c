@@ -22,14 +22,25 @@ TEST(connect_1) {
     return TEST_SUCCESS;
 }
 
-TEST(pkg_auth_1) {
+TEST(pkg_auth_1_write) {
     size_t          size;
     void            *ret;
 
     TEST_ASSERT(sockfd, "Server is not responding");
-    ret = pkg_build_auth(&size, 0, 1);
+    ret = pkg_build_auth(&size, 1, 0);
     TEST_ASSERT(write(sockfd, ret, size) != 0,
         "Cannot send package to the server");
+    return TEST_SUCCESS;
+}
+
+TEST(pkg_auth_1_read) {
+    void        *ret;
+    package_t   *pkg;
+
+    ret = malloc(2048);
+    read(sockfd, ret, 2048);
+    pkg = read_pkg(ret);
+    TEST_ASSERT(pkg, "Can't read package");
     return TEST_SUCCESS;
 }
 
@@ -40,7 +51,8 @@ TEST(cleanup) {
 
 void        begin_client_test(void) {
     reg_test("connect", connect_1);
-    reg_test("auth", pkg_auth_1);
+    reg_test("auth", pkg_auth_1_write);
+    reg_test("auth", pkg_auth_1_read);
     reg_test("clean", cleanup);
     test_all();
     test_free();
