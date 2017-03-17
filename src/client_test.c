@@ -39,7 +39,7 @@ TEST(pkg_auth_1_read) {
     size_t      r_n = 0, size;
 
     TEST_ASSERT(sockfd, "Server is not responding");
-    expect = pkg_build_auth(&size, 1, 0);
+    expect = pkg_build_auth_ack(&size, 1, 0);
     ret = malloc(2048);
     r_n = read(sockfd, ret, 2048);
 

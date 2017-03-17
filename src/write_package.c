@@ -2,6 +2,7 @@
 
 static void *write_header(package_t *pkg, size_t *count) {
     void    *header;
+    u8_t    tmp;
 
     *count = 0;
     header = malloc(sizeof(pkg->type) + 
@@ -11,7 +12,8 @@ static void *write_header(package_t *pkg, size_t *count) {
                     pkg->next_pkg_len);
     assert(header != NULL);
 
-    write_member(pkg->type, header, *count);
+    tmp = pkg->type + 1;
+    write_member(tmp, header, *count);
     write_member(pkg->size, header, *count);
     write_member(pkg->next_pkg_len, header, *count);
     if (pkg->next_pkg_len != 0) {

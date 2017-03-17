@@ -29,7 +29,7 @@ typedef struct      package_s {
 
 /* Type field of the header */
 typedef enum        package_type_e {
-    PKG_TYPE_AUTH = 1,
+    PKG_TYPE_AUTH = 0,
     PKG_TYPE_AUTH_ACK,
     PKG_TYPE_ERROR,
     PKG_TYPE_REQ_GET_PKG,
@@ -160,5 +160,6 @@ typedef struct      resp_cat_s {
 void        *write_package(package_t *pkg, size_t *size);
 package_t      *read_pkg(void *data);
 void *pkg_build_auth(size_t *size, int major_version, int minor_version);
+void *pkg_build_auth_ack(size_t *size, int major_version, int minor_version);
 
 #endif /* PACKAGE_H */
