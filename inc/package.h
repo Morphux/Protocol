@@ -111,6 +111,9 @@ typedef struct      req_get_news_s {
     u64_t       *pkgs_ids;
 }         SF_PACKED req_get_news_t;
 
+# define SIZEOF_REQ_GET_NEWS(news) (sizeof(news->last_request) + sizeof(news->pkgs_ids_size) + \
+                                    sizeof(*news->pkgs_ids) * news->pkgs_ids_size)
+
 typedef struct      req_get_cat_s {
     u16_t       cat_len;
     u64_t       *categories;
@@ -173,6 +176,9 @@ void *pkg_build_auth(size_t *size, int major_version, int minor_version);
 void *pkg_build_auth_ack(size_t *size, int major_version, int minor_version);
 void *pkg_build_error(size_t *size, error_type_t type, const char *error);
 void *pkg_build_req_get_pkg(size_t *size, u64_t id, u8_t state, const char *name, 
-void *pkg_build_req_get_file(size_t *size, u64_t id, const char *path) {
+            const char *category, const char *version);
+void *pkg_build_req_get_file(size_t *size, u64_t id, const char *path);
+void *pkg_build_req_get_news(size_t *size, time_t last_request, u16_t ids_size, 
+                                u64_t *ids);
 
 #endif /* PACKAGE_H */

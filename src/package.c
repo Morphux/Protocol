@@ -88,3 +88,22 @@ void *pkg_build_req_get_file(size_t *size, u64_t id, const char *path) {
     list_add(pkg->payload, file, SIZEOF_REQ_GET_FILE(file));
     return write_package(pkg, size);
 }
+
+void *pkg_build_req_get_news(size_t *size, time_t last_request, u16_t ids_size, 
+                                u64_t *ids) {
+    req_get_news_t      *news;
+    package_t           *pkg;
+
+    news = malloc(sizeof(req_get_news_t));
+    news->last_request = last_request;
+    news->pkgs_ids_size = ids_size;
+    news->pkgs_ids = malloc(sizeof(*ids) * ids_size);
+    memcpy(news->pkgs_ids, ids, sizeof(*ids) * ids_size);
+
+    pkg = malloc(sizeof(package_t));
+    pkg->type = PKG_TYPE_REQ_GET_NEWS;
+    pkg->payload = NULL;
+    pkg->number = 1;
+    list_add(pkg->payload, news, SIZEOF_REQ_GET_NEWS(news));
+    return write_package(pkg, size);
+}
