@@ -37,6 +37,7 @@ TEST(pkg_auth_1_read) {
     void        *ret;
     package_t   *pkg;
 
+    TEST_ASSERT(sockfd, "Server is not responding");
     ret = malloc(2048);
     read(sockfd, ret, 2048);
     pkg = read_pkg(ret);
@@ -45,6 +46,7 @@ TEST(pkg_auth_1_read) {
 }
 
 TEST(cleanup) {
+    TEST_ASSERT(sockfd, "Server is not responding");
     TEST_ASSERT(close(sockfd) != -1, "Cannot close socket");
     return TEST_SUCCESS;
 }
