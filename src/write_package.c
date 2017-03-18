@@ -295,6 +295,7 @@ void        *write_package(package_t *pkg, size_t *size) {
 
     pkg->size = 0;
     pkg->next_pkg_len = 0;
+    pkg->number = list_size(pkg->payload);
     header = write_header(pkg, &header_size);
     payload = write_payload(pkg, &payload_size);
 

@@ -10,7 +10,6 @@ void *pkg_build_auth(size_t *size, int major_version, int minor_version) {
     pkg = malloc(sizeof(package_t));
     pkg->type = PKG_TYPE_AUTH;
     pkg->payload = NULL;
-    pkg->number = 1;
     list_add(pkg->payload, auth, sizeof(auth_t));
     return write_package(pkg, size);
 }
@@ -26,7 +25,6 @@ void *pkg_build_auth_ack(size_t *size, int major_version, int minor_version) {
     pkg = malloc(sizeof(package_t));
     pkg->type = PKG_TYPE_AUTH_ACK;
     pkg->payload = NULL;
-    pkg->number = 1;
     list_add(pkg->payload, auth, sizeof(auth_t));
     ret = write_package(pkg, size);
     return ret;
@@ -44,7 +42,6 @@ void *pkg_build_error(size_t *size, error_type_t type, const char *error) {
     pkg = malloc(sizeof(package_t));
     pkg->type = PKG_TYPE_ERROR;
     pkg->payload = NULL;
-    pkg->number = 1;
     list_add(pkg->payload, err, SIZEOF_ERR(err));
     return write_package(pkg, size);
 }
@@ -67,7 +64,6 @@ void *pkg_build_req_get_pkg(size_t *size, u64_t id, u8_t state, const char *name
     pkg = malloc(sizeof(package_t));
     pkg->type = PKG_TYPE_REQ_GET_PKG;
     pkg->payload = NULL;
-    pkg->number = 1;
     list_add(pkg->payload, req, SIZEOF_REQ_GET_PKG(req));
     return write_package(pkg, size);
 }
@@ -84,7 +80,6 @@ void *pkg_build_req_get_file(size_t *size, u64_t id, const char *path) {
     pkg = malloc(sizeof(package_t));
     pkg->type = PKG_TYPE_REQ_GET_FILE;
     pkg->payload = NULL;
-    pkg->number = 1;
     list_add(pkg->payload, file, SIZEOF_REQ_GET_FILE(file));
     return write_package(pkg, size);
 }
@@ -103,7 +98,6 @@ void *pkg_build_req_get_news(size_t *size, time_t last_request, u16_t ids_size,
     pkg = malloc(sizeof(package_t));
     pkg->type = PKG_TYPE_REQ_GET_NEWS;
     pkg->payload = NULL;
-    pkg->number = 1;
     list_add(pkg->payload, news, SIZEOF_REQ_GET_NEWS(news));
     return write_package(pkg, size);
 }
@@ -120,7 +114,6 @@ void *pkg_build_req_get_cat(size_t *size, u16_t len, u64_t *a_cat) {
     pkg = malloc(sizeof(package_t));
     pkg->type = PKG_TYPE_REQ_CAT;
     pkg->payload = NULL;
-    pkg->number = 1;
     list_add(pkg->payload, cat, SIZEOF_REQ_GET_CAT(cat));
     return write_package(pkg, size);
 }
