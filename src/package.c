@@ -133,3 +133,38 @@ void *pkg_build_req_get_upd(size_t *size, u64_t len, u64_t *a_pkgs) {
     list_add(pkg->payload, upd, SIZEOF_REQ_GET_UPD(upd));
     return write_package(pkg, size);
 }
+
+void *pkg_build_resp_pkg(size_t *size, u64_t id, float comp_time,
+        float inst_size, float arch_size, u8_t state, const char *name, 
+        const char *category, const char *version, const char *archive,
+        const char *checksum, u16_t dep_size, u64_t *dependencies)
+{
+    resp_pkg_t      *pkg;
+    package_t       *ptr;
+
+    pkg = malloc(sizeof(resp_pkg_t));
+    pkg->id = id;
+    pkg->comp_time = comp_time;
+    pkg->inst_size = inst_size;
+    pkg->arch_size = arch_size;
+    pkg->state = state;
+    pkg->name_len = strlen(name);
+    pkg->category_len = strlen(name);
+    pkg->version_len = strlen(version);
+    pkg->checksum_len = strlen(checksum);
+    pkg->dependencies_size = dep_size;
+
+    pkg->name = strdup(name);
+    pkg->category = strdup(category);
+    pkg->version = strdup(version);
+    pkg->archive = strdup(archive);
+    pkg->checksum = strdup(checksum);
+    pkg->dependencies = malloc(sizeof(*dependencies) * dep_size);
+    memcpy(pkg->dependencies, dependencies, sizeof(*dependencies) * dep_size);
+
+    ptr = malloc(sizeof(package_t));
+    ptr->type = PKG_TYPE_RESP_PKG;
+    ptr->payload = NULL;
+    list_add(ptr->payload, pkg, SIZEOF_RESP_PKG(pkg));
+    return write_package(ptr, size);
+}

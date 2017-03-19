@@ -148,6 +148,14 @@ typedef struct      resp_pkg_s {
     u64_t       *dependencies;
 }       SF_PACKED resp_pkg_t;
 
+# define SIZEOF_RESP_PKG(pkg) (sizeof(pkg->id) + sizeof(pkg->comp_time) + sizeof(pkg->inst_size) + \
+                                sizeof(pkg->arch_size) + sizeof(pkg->state) + sizeof(pkg->name_len) + \
+                                sizeof(pkg->category_len) + sizeof(pkg->version_len) + \
+                                sizeof(pkg->archive_len) + sizeof(pkg->checksum_len) + \
+                                sizeof(pkg->dependencies_size) + pkg->name_len + \
+                                pkg->category_len + pkg->version_len + pkg->archive_len + \
+                                pkg->checksum_len + (sizeof(*pkg->dependencies) * pkg->dependencies_size))
+
 typedef struct      resp_file_s {
     u64_t       id;
     u8_t        type;
@@ -186,5 +194,9 @@ void *pkg_build_req_get_news(size_t *size, time_t last_request, u16_t ids_size,
                                 u64_t *ids);
 void *pkg_build_req_get_cat(size_t *size, u16_t len, u64_t *a_cat);
 void *pkg_build_req_get_upd(size_t *size, u64_t len, u64_t *a_pkgs);
+void *pkg_build_resp_pkg(size_t *size, u64_t id, float comp_time,
+        float inst_size, float arch_size, u8_t state, const char *name, 
+        const char *category, const char *version, const char *archive,
+        const char *checksum, u16_t dep_size, u64_t *dependencies);
 
 #endif /* PACKAGE_H */
