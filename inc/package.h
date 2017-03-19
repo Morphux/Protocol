@@ -164,6 +164,9 @@ typedef struct      resp_file_s {
     char        *path;
 }         SF_PACKED resp_file_t;
 
+# define SIZEOF_RESP_FILE(f) (sizeof(f->id) + sizeof(f->type) + sizeof(f->parent_id) + \
+                                sizeof(f->path_len) + f->path_len)
+
 typedef struct      resp_news_s {
     u64_t       id;
     u64_t       parent_id;
@@ -198,5 +201,7 @@ void *pkg_build_resp_pkg(size_t *size, u64_t id, float comp_time,
         float inst_size, float arch_size, u8_t state, const char *name, 
         const char *category, const char *version, const char *archive,
         const char *checksum, u16_t dep_size, u64_t *dependencies);
+void *pkg_build_resp_file(size_t *size, u64_t id, u8_t type, u64_t parent_id,
+                            const char *path);
 
 #endif /* PACKAGE_H */

@@ -137,8 +137,7 @@ void *pkg_build_req_get_upd(size_t *size, u64_t len, u64_t *a_pkgs) {
 void *pkg_build_resp_pkg(size_t *size, u64_t id, float comp_time,
         float inst_size, float arch_size, u8_t state, const char *name, 
         const char *category, const char *version, const char *archive,
-        const char *checksum, u16_t dep_size, u64_t *dependencies)
-{
+        const char *checksum, u16_t dep_size, u64_t *dependencies) {
     resp_pkg_t      *pkg;
     package_t       *ptr;
 
@@ -167,4 +166,23 @@ void *pkg_build_resp_pkg(size_t *size, u64_t id, float comp_time,
     ptr->payload = NULL;
     list_add(ptr->payload, pkg, SIZEOF_RESP_PKG(pkg));
     return write_package(ptr, size);
+}
+
+void *pkg_build_resp_file(size_t *size, u64_t id, u8_t type, u64_t parent_id,
+                            const char *path) {
+    resp_file_t     *file;
+    package_t       *pkg;
+
+    file = malloc(sizeof(resp_file_t));
+    file->id = id;
+    file->type = type;
+    file->parent_id = parent_id;
+    file->path_len = strlen(path);
+    file->path = strdup(path);
+
+    pkg = malloc(sizeof(package_t));
+    pkg->type = PKG_TYPE_RESP_FILE;
+    pkg->payload = NULL;
+    list_add(pkg->payload, file, SIZEOF_RESP_FILE(file));
+    return write_package(pkg, size);
 }
