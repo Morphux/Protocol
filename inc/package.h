@@ -126,6 +126,8 @@ typedef struct      req_get_upd_s {
     u64_t       *packages;
 }         SF_PACKED req_get_upd_t;
 
+# define SIZEOF_REQ_GET_UPD(upd) (sizeof(upd->pkg_len) + sizeof(*upd->packages) * upd->pkg_len)
+
 typedef struct      resp_pkg_s {
     u64_t       id;
     float       comp_time;
@@ -183,5 +185,6 @@ void *pkg_build_req_get_file(size_t *size, u64_t id, const char *path);
 void *pkg_build_req_get_news(size_t *size, time_t last_request, u16_t ids_size, 
                                 u64_t *ids);
 void *pkg_build_req_get_cat(size_t *size, u16_t len, u64_t *a_cat);
+void *pkg_build_req_get_upd(size_t *size, u64_t len, u64_t *a_pkgs);
 
 #endif /* PACKAGE_H */
