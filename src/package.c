@@ -186,3 +186,26 @@ void *pkg_build_resp_file(size_t *size, u64_t id, u8_t type, u64_t parent_id,
     list_add(pkg->payload, file, SIZEOF_RESP_FILE(file));
     return write_package(pkg, size);
 }
+
+void *pkg_build_resp_news(size_t *size, u64_t id, u64_t parent_id, const char *author,
+                            const char *author_mail, const char *text) {
+    resp_news_t     *news;
+    package_t       *pkg;
+
+    news = malloc(sizeof(resp_news_t));
+    news->id = id;
+    news->parent_id = parent_id;
+    news->author_len = strlen(author);
+    news->author_mail_len = strlen(author_mail);
+    news->text_len = strlen(text);
+
+    news->author = strdup(author);
+    news->author_mail = strdup(author_mail);
+    news->text = strdup(text);
+
+    pkg = malloc(sizeof(package_t));
+    pkg->type = PKG_TYPE_RESP_FILE;
+    pkg->payload = NULL;
+    list_add(pkg->payload, news, SIZEOF_RESP_NEWS(news));
+    return write_package(pkg, size);
+}

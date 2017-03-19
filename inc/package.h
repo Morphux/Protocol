@@ -178,6 +178,10 @@ typedef struct      resp_news_s {
     char        *text;
 }          SF_PACKED resp_news_t;
 
+# define SIZEOF_RESP_NEWS(n) (sizeof(n->id) + sizeof(n->parent_id) + sizeof(n->author_len) + \
+                                sizeof(n->author_mail_len) + sizeof(n->text_len) + \
+                                n->author_len + n->author_mail_len + n->text_len)
+
 typedef struct      resp_cat_s {
     u64_t       id;
     u64_t       parent_id;
@@ -203,5 +207,7 @@ void *pkg_build_resp_pkg(size_t *size, u64_t id, float comp_time,
         const char *checksum, u16_t dep_size, u64_t *dependencies);
 void *pkg_build_resp_file(size_t *size, u64_t id, u8_t type, u64_t parent_id,
                             const char *path);
+void *pkg_build_resp_news(size_t *size, u64_t id, u64_t parent_id, const char *author,
+                            const char *author_mail, const char *text);
 
 #endif /* PACKAGE_H */
