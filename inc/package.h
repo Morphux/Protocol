@@ -189,6 +189,9 @@ typedef struct      resp_cat_s {
     char        *name;
 }         SF_PACKED resp_cat_t;
 
+# define SIZEOF_RESP_CAT(c) (sizeof(c->id) + sizeof(c->parent_id) + \
+                                sizeof(c->name_len) + c->name_len)
+
 void        *write_package(package_t *pkg, size_t *size);
 package_t      *read_pkg(void *data);
 void *pkg_build_auth(size_t *size, int major_version, int minor_version);
@@ -209,5 +212,6 @@ void *pkg_build_resp_file(size_t *size, u64_t id, u8_t type, u64_t parent_id,
                             const char *path);
 void *pkg_build_resp_news(size_t *size, u64_t id, u64_t parent_id, const char *author,
                             const char *author_mail, const char *text);
+void *pkg_build_resp_cat(size_t *size, u64_t id, u64_t parent_id, const char *name);
 
 #endif /* PACKAGE_H */

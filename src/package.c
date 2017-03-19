@@ -209,3 +209,20 @@ void *pkg_build_resp_news(size_t *size, u64_t id, u64_t parent_id, const char *a
     list_add(pkg->payload, news, SIZEOF_RESP_NEWS(news));
     return write_package(pkg, size);
 }
+
+void *pkg_build_resp_cat(size_t *size, u64_t id, u64_t parent_id, const char *name) {
+    resp_cat_t      *cat;
+    package_t       *pkg;
+
+    cat = malloc(sizeof(resp_cat_t));
+    cat->id = id;
+    cat->parent_id = parent_id;
+    cat->name_len = strlen(name);
+    cat->name = strdup(name);
+
+    pkg = malloc(sizeof(package_t));
+    pkg->type = PKG_TYPE_RESP_CAT;
+    pkg->payload = NULL;
+    list_add(pkg->payload, cat, SIZEOF_RESP_CAT(cat));
+    return write_package(pkg, size);
+}
