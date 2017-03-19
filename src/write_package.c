@@ -66,7 +66,7 @@ static void     *write_payload_req_get_pkg(void *pkg, size_t *count) {
     ret = malloc(sizeof(req->id) + sizeof(req->state) + sizeof(req->name_len)
             + sizeof(req->categ_len) + sizeof(req->version_len)
             + req->name_len + req->categ_len + req->version_len);
-    assert(req != NULL);
+    assert(ret != NULL);
 
     write_member(req->id, ret, *count);
     write_member(req->state, ret, *count);

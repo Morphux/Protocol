@@ -42,14 +42,14 @@ void *pkg_build_error(size_t *size, error_type_t type, const char *error) {
     pkg = malloc(sizeof(package_t));
     pkg->type = PKG_TYPE_ERROR;
     pkg->payload = NULL;
-    list_add(pkg->payload, err, SIZEOF_ERR(err));
+    list_add(pkg->payload, err, sizeof(*err));
     return write_package(pkg, size);
 }
 
 void *pkg_build_req_get_pkg(size_t *size, u64_t id, u8_t state, const char *name, 
             const char *category, const char *version) {
     req_get_pkg_t       *req;
-    package_t           *pkg;
+    package_t           *pkg = NULL;
 
     req = malloc(sizeof(req_get_pkg_t));
     req->id = id;
@@ -64,7 +64,9 @@ void *pkg_build_req_get_pkg(size_t *size, u64_t id, u8_t state, const char *name
     pkg = malloc(sizeof(package_t));
     pkg->type = PKG_TYPE_REQ_GET_PKG;
     pkg->payload = NULL;
-    list_add(pkg->payload, req, SIZEOF_REQ_GET_PKG(req));
+    list_add(pkg->payload, req, sizeof(req_get_pkg_t));
+    req = pkg->payload->member;
+
     return write_package(pkg, size);
 }
 
@@ -80,7 +82,7 @@ void *pkg_build_req_get_file(size_t *size, u64_t id, const char *path) {
     pkg = malloc(sizeof(package_t));
     pkg->type = PKG_TYPE_REQ_GET_FILE;
     pkg->payload = NULL;
-    list_add(pkg->payload, file, SIZEOF_REQ_GET_FILE(file));
+    list_add(pkg->payload, file, sizeof(*file));
     return write_package(pkg, size);
 }
 
@@ -98,7 +100,7 @@ void *pkg_build_req_get_news(size_t *size, time_t last_request, u16_t ids_size,
     pkg = malloc(sizeof(package_t));
     pkg->type = PKG_TYPE_REQ_GET_NEWS;
     pkg->payload = NULL;
-    list_add(pkg->payload, news, SIZEOF_REQ_GET_NEWS(news));
+    list_add(pkg->payload, news, sizeof(*news));
     return write_package(pkg, size);
 }
 
@@ -114,7 +116,7 @@ void *pkg_build_req_get_cat(size_t *size, u16_t len, u64_t *a_cat) {
     pkg = malloc(sizeof(package_t));
     pkg->type = PKG_TYPE_REQ_CAT;
     pkg->payload = NULL;
-    list_add(pkg->payload, cat, SIZEOF_REQ_GET_CAT(cat));
+    list_add(pkg->payload, cat, sizeof(*cat));
     return write_package(pkg, size);
 }
 
@@ -130,7 +132,7 @@ void *pkg_build_req_get_upd(size_t *size, u64_t len, u64_t *a_pkgs) {
     pkg = malloc(sizeof(package_t));
     pkg->type = PKG_TYPE_REQ_UPD;
     pkg->payload = NULL;
-    list_add(pkg->payload, upd, SIZEOF_REQ_GET_UPD(upd));
+    list_add(pkg->payload, upd, sizeof(*upd));
     return write_package(pkg, size);
 }
 
@@ -164,7 +166,7 @@ void *pkg_build_resp_pkg(size_t *size, u64_t id, float comp_time,
     ptr = malloc(sizeof(package_t));
     ptr->type = PKG_TYPE_RESP_PKG;
     ptr->payload = NULL;
-    list_add(ptr->payload, pkg, SIZEOF_RESP_PKG(pkg));
+    list_add(ptr->payload, pkg, sizeof(*pkg));
     return write_package(ptr, size);
 }
 
@@ -183,7 +185,7 @@ void *pkg_build_resp_file(size_t *size, u64_t id, u8_t type, u64_t parent_id,
     pkg = malloc(sizeof(package_t));
     pkg->type = PKG_TYPE_RESP_FILE;
     pkg->payload = NULL;
-    list_add(pkg->payload, file, SIZEOF_RESP_FILE(file));
+    list_add(pkg->payload, file, sizeof(*file));
     return write_package(pkg, size);
 }
 
@@ -206,7 +208,7 @@ void *pkg_build_resp_news(size_t *size, u64_t id, u64_t parent_id, const char *a
     pkg = malloc(sizeof(package_t));
     pkg->type = PKG_TYPE_RESP_FILE;
     pkg->payload = NULL;
-    list_add(pkg->payload, news, SIZEOF_RESP_NEWS(news));
+    list_add(pkg->payload, news, sizeof(*news));
     return write_package(pkg, size);
 }
 
@@ -223,6 +225,6 @@ void *pkg_build_resp_cat(size_t *size, u64_t id, u64_t parent_id, const char *na
     pkg = malloc(sizeof(package_t));
     pkg->type = PKG_TYPE_RESP_CAT;
     pkg->payload = NULL;
-    list_add(pkg->payload, cat, SIZEOF_RESP_CAT(cat));
+    list_add(pkg->payload, cat, sizeof(*cat));
     return write_package(pkg, size);
 }

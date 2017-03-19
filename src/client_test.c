@@ -52,6 +52,16 @@ TEST(pkg_auth_1_read) {
     return TEST_SUCCESS;
 }
 
+TEST(pkg_req_get_pkg_1_write) {
+    void        *ret;
+    size_t      size;
+
+    TEST_ASSERT(sockfd, "Server is not responding");
+    ret = pkg_build_req_get_pkg(&size, 1, PKG_STABLE, "Test", "pkg", "v45.03");
+    TEST_ASSERT(write(sockfd, ret, size), "Cannot send package to the server");
+    return TEST_SUCCESS;
+}
+
 TEST(cleanup) {
     TEST_ASSERT(sockfd, "Server is not responding");
     TEST_ASSERT(close(sockfd) != -1, "Cannot close socket");
@@ -62,6 +72,7 @@ void        begin_client_test(void) {
     reg_test("connect", connect_1);
     reg_test("auth", pkg_auth_1_write);
     reg_test("auth", pkg_auth_1_read);
+    reg_test("get_pkg", pkg_req_get_pkg_1_write);
     reg_test("clean", cleanup);
     test_all();
     test_free();
