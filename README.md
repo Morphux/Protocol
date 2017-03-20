@@ -28,5 +28,5 @@ make
 
 ### Fake client
 ```
-./protocol_test client 
+./protocol_test -p <port> -a <IP> client
 ```
