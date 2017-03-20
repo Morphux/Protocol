@@ -36,11 +36,21 @@ TEST(pkg_auth_1_write) {
 TEST(pkg_auth_1_read) {
     void        *ret, *expect;
     package_t   *pkg;
-    size_t      r_n = 0, size;
+    auth_t      *auth;
+    fd_set      set;
+    size_t      r_n = 0, size, rv;
+    struct timeval timeout;
 
     TEST_ASSERT(sockfd, "Server is not responding");
     expect = pkg_build_auth_ack(&size, 1, 0);
     ret = malloc(2048);
+
+    FD_ZERO(&set);
+    FD_SET(sockfd, &set);
+    timeout.tv_sec = 1;
+    timeout.tv_usec = 0;
+    rv = select(sockfd + 1, &set, NULL, NULL, &timeout);
+    TEST_ASSERT(rv > 0, "Timeout on read");
     r_n = read(sockfd, ret, 2048);
 
     TEST_ASSERT(r_n == size, "Package returned size is wrong");
@@ -48,6 +58,10 @@ TEST(pkg_auth_1_read) {
     pkg = read_pkg(ret);
     TEST_ASSERT(pkg, "Can't read package");
     TEST_ASSERT(pkg->type == PKG_TYPE_AUTH_ACK, "Package type is wrong");
+
+    auth = pkg->payload->member;
+    TEST_ASSERT(auth->mpm_major_version == 1, "MPM major version is wrong");
+    TEST_ASSERT(auth->mpm_minor_version == 0, "MPM minor version is wrong");
     free(ret);
     return TEST_SUCCESS;
 }
