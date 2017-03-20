@@ -301,7 +301,8 @@ void        *write_package(package_t *pkg, size_t *size) {
 
     *size = header_size + payload_size;
     ret = malloc(*size);
-    memcpy(header + 1, size, sizeof(*size));
+    u16_t       size_tmp = (u16_t)*size;
+    memcpy(header + 1, &size_tmp, sizeof(size_tmp));
     assert(ret != NULL);
     memcpy(ret, header, header_size);
     memcpy(ret + header_size, payload, payload_size);

@@ -247,8 +247,9 @@ char *print_package(void *exp, void *ret, size_t exp_size, size_t ret_size) {
             asprintf(&res, "%s\033[0;31m%02x\033[0;37m ", res, s_ret[i]);
         else
             asprintf(&res, "%s%02x ", res, s_ret[i]);
-        if (i % 10)
+        if (i % 10 == 0 && i != 0)
             asprintf(&res, "%s\n ",res);
     }
+    asprintf(&res, "%s\n ",res);
     return res;
 }
