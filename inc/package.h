@@ -17,6 +17,8 @@
                                 count += len; \
                                 }
 
+char *print_package(void *exp, void *ret, size_t exp_size, size_t ret_size);
+
 /* Header */
 typedef struct      package_s {
     u8_t        type;

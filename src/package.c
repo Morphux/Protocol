@@ -228,3 +228,27 @@ void *pkg_build_resp_cat(size_t *size, u64_t id, u64_t parent_id, const char *na
     list_add(pkg->payload, cat, sizeof(*cat));
     return write_package(pkg, size);
 }
+
+char *print_package(void *exp, void *ret, size_t exp_size, size_t ret_size) {
+    char        *res = NULL;
+    char        *s_exp = exp, *s_ret = ret;
+    size_t      max_size = (ret_size > exp_size ? ret_size : exp_size);
+
+    res = strdup("\n> ");
+    for (size_t i = 0; i < exp_size; i++) {
+        asprintf(&res, "%s%02x ", res, s_exp[i]);
+        if (i % 10 == 0 && i != 0)
+            asprintf(&res, "%s\n ",res);
+    }
+    asprintf(&res, "%s\n> ",res);
+    fflush(stdout);
+    for (size_t i = 0; i < ret_size; i++) {
+        if (i < max_size && s_ret[i] != s_exp[i])
+            asprintf(&res, "%s\033[0;31m%02x\033[0;37m ", res, s_ret[i]);
+        else
+            asprintf(&res, "%s%02x ", res, s_ret[i]);
+        if (i % 10)
+            asprintf(&res, "%s\n ",res);
+    }
+    return res;
+}

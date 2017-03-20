@@ -44,7 +44,7 @@ TEST(pkg_auth_1_read) {
     ret = malloc(2048);
 
     READ_TIMEOUT(sockfd, ret, 2048, 1, r_n);
-    TEST_ASSERT(r_n == size, "Package returned size is wrong");
+    TEST_ASSERT_FMT(r_n == size, "Package returned size is wrong (%zu - %zu) %s", r_n, size, print_package(expect, ret, size, r_n));
     TEST_ASSERT(memcmp(ret, expect, size) == 0, "Expected package is wrong");
     pkg = read_pkg(ret);
     TEST_ASSERT(pkg, "Can't read package");
