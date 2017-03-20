@@ -18,7 +18,7 @@ git clone --recursive https://github.com/Morphux/Protocol.git
 
 ### Compile
 ```
-make
+make init all
 ```
 
 ### Fake server
