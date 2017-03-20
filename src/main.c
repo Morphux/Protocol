@@ -37,7 +37,7 @@ int     main(int ac, char **av) {
     read_opt(ac, av, opts, &list);
 
     if (g_port == 0 || g_ip == NULL || g_db_path == NULL)
-        m_panic("Missing arguments.");
+        opt_help(opts, 1);
     list_for_each(list, tmp, ptr) {
         if (strcmp(ptr, CLIENT_CMD) == 0)
             begin_client_test();

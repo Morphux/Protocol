@@ -1,6 +1,6 @@
 #include "package.h"
 
-static void *write_header(package_t *pkg, size_t *count) {
+static void *write_header(prot_package_t *pkg, size_t *count) {
     void    *header;
 
     *count = 0;
@@ -266,7 +266,7 @@ static const        callback_t arr[] = {
     {PKG_TYPE_RESP_CAT, &write_payload_resp_cat}
 };
 
-void        *write_payload(package_t *pkg, size_t *count) {
+void        *write_payload(prot_package_t *pkg, size_t *count) {
     mlist_t *tmp;
     void    *ptr, *payl_tmp, *ret = NULL;
     size_t  size, index;
@@ -289,7 +289,7 @@ void        *write_payload(package_t *pkg, size_t *count) {
     return ret;
 }
 
-void        *write_package(package_t *pkg, size_t *size) {
+void        *write_package(prot_package_t *pkg, size_t *size) {
     void    *header, *payload, *ret;
     size_t  header_size = 0, payload_size = 0;
 

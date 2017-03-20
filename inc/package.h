@@ -1,5 +1,5 @@
-#ifndef PACKAGE_H
-# define PACKAGE_H
+#ifndef PROT_PACKAGE_H
+# define PROT_PACKAGE_H
 
 # include <morphux.h>
 # include "protocol_test.h"
@@ -20,17 +20,17 @@
 char *print_package(void *exp, void *ret, size_t exp_size, size_t ret_size);
 
 /* Header */
-typedef struct      package_s {
+typedef struct      prot_package_s {
     u8_t        type;
     u16_t       size;
     u8_t        next_pkg_len;
     char        *next_pkg;
     u8_t        number;
     mlist_t     *payload;
-}        SF_PACKED package_t;
+}        SF_PACKED prot_package_t;
 
 /* Type field of the header */
-typedef enum        package_type_e {
+typedef enum        prot_package_type_e {
     PKG_TYPE_AUTH = 0x1,
     PKG_TYPE_AUTH_ACK = 0x2,
     PKG_TYPE_ERROR = 0x3,
@@ -44,7 +44,7 @@ typedef enum        package_type_e {
     PKG_TYPE_RESP_NEWS = 0x22,
     PKG_TYPE_RESP_CAT = 0x23,
     PKG_TYPE_END = 0x24
-}                   package_type_t;
+}                   prot_package_type_t;
 
 /* Payloads */
 
@@ -92,12 +92,12 @@ typedef struct      req_get_pkg_s {
                                     pkg->version_len)
 
 /* Stability of packages */
-typedef enum        package_state_e {
+typedef enum        prot_package_state_e {
     PKG_STABLE = 1,
     PKG_UNSTABLE,
     PKG_DEV,
     PKG_END
-}                   package_state_t;
+}                   prot_package_state_t;
 
 typedef struct      req_get_file_s {
     u64_t       id;
@@ -194,8 +194,8 @@ typedef struct      resp_cat_s {
 # define SIZEOF_RESP_CAT(c) (sizeof(c->id) + sizeof(c->parent_id) + \
                                 sizeof(c->name_len) + c->name_len)
 
-void        *write_package(package_t *pkg, size_t *size);
-package_t      *read_pkg(void *data);
+void        *write_package(prot_package_t *pkg, size_t *size);
+prot_package_t      *read_pkg(void *data);
 void *pkg_build_auth(size_t *size, int major_version, int minor_version);
 void *pkg_build_auth_ack(size_t *size, int major_version, int minor_version);
 void *pkg_build_error(size_t *size, error_type_t type, const char *error);
@@ -216,4 +216,4 @@ void *pkg_build_resp_news(size_t *size, u64_t id, u64_t parent_id, const char *a
                             const char *author_mail, const char *text);
 void *pkg_build_resp_cat(size_t *size, u64_t id, u64_t parent_id, const char *name);
 
-#endif /* PACKAGE_H */
+#endif /* PROT_PACKAGE_H */

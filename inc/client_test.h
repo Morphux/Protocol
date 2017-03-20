@@ -10,6 +10,7 @@
 # include <strings.h>
 # include <netdb.h>
 # include "package.h"
+# include "../lib/inc/package.h"
 
 # define READ_TIMEOUT(sockfd, ret, size, sec, r_n) fd_set set; \
                         struct timeval timeout; \

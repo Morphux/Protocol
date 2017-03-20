@@ -1,6 +1,6 @@
 #include "package.h"
 
-static size_t                read_header(package_t *pkg, void *data) {
+static size_t                read_header(prot_package_t *pkg, void *data) {
     size_t      count = 0;
 
     read_member(pkg->type);
@@ -17,13 +17,13 @@ static size_t                read_header(package_t *pkg, void *data) {
     return count;
 }
 
-static bool     check_type(package_t *pkg) {
+static bool     check_type(prot_package_t *pkg) {
     if (pkg->type >= PKG_TYPE_END)
         return false;
     return true;
 }
 
-static size_t       read_payload_auth(package_t *pkg, void *data) {
+static size_t       read_payload_auth(prot_package_t *pkg, void *data) {
     size_t      count = 0;
     auth_t      *auth;
 
@@ -37,7 +37,7 @@ static size_t       read_payload_auth(package_t *pkg, void *data) {
     return count;
 }
 
-static size_t       read_payload_auth_ack(package_t *pkg, void *data) {
+static size_t       read_payload_auth_ack(prot_package_t *pkg, void *data) {
     size_t      count = 0;
     auth_ack_t  *auth;
 
@@ -51,7 +51,7 @@ static size_t       read_payload_auth_ack(package_t *pkg, void *data) {
     return count;
 }
 
-static size_t       read_payload_error(package_t *pkg, void *data) {
+static size_t       read_payload_error(prot_package_t *pkg, void *data) {
     size_t      count = 0;
     error_pkg_t *err;
 
@@ -73,7 +73,7 @@ static size_t       read_payload_error(package_t *pkg, void *data) {
     return count;
 }
 
-static size_t       read_payload_get_package(package_t *pkg, void *data) {
+static size_t       read_payload_get_package(prot_package_t *pkg, void *data) {
     size_t      count = 0;
     req_get_pkg_t   *req;
 
@@ -114,7 +114,7 @@ static size_t       read_payload_get_package(package_t *pkg, void *data) {
     return count;
 }
 
-static size_t           read_payload_get_file(package_t *pkg, void *data) {
+static size_t           read_payload_get_file(prot_package_t *pkg, void *data) {
     size_t      count = 0;
     req_get_file_t  *req;
 
@@ -136,7 +136,7 @@ static size_t           read_payload_get_file(package_t *pkg, void *data) {
     return count;
 }
 
-static size_t           read_payload_get_news(package_t *pkg, void *data) {
+static size_t           read_payload_get_news(prot_package_t *pkg, void *data) {
     size_t      count = 0;
     req_get_news_t  *req;
 
@@ -159,7 +159,7 @@ static size_t           read_payload_get_news(package_t *pkg, void *data) {
     return count;
 }
 
-static size_t           read_payload_get_cat(package_t *pkg, void *data) {
+static size_t           read_payload_get_cat(prot_package_t *pkg, void *data) {
     size_t      count = 0;
     req_get_cat_t   *req;
 
@@ -181,7 +181,7 @@ static size_t           read_payload_get_cat(package_t *pkg, void *data) {
     return count;
 }
 
-static size_t           read_payload_get_upd(package_t *pkg, void *data) {
+static size_t           read_payload_get_upd(prot_package_t *pkg, void *data) {
     size_t      count = 0;
     req_get_upd_t   *req;
 
@@ -203,7 +203,7 @@ static size_t           read_payload_get_upd(package_t *pkg, void *data) {
     return count;
 }
 
-static size_t           read_payload_resp_pkg(package_t *pkg, void *data) {
+static size_t           read_payload_resp_pkg(prot_package_t *pkg, void *data) {
     size_t      count = 0;
     resp_pkg_t      *resp;
 
@@ -275,7 +275,7 @@ static size_t           read_payload_resp_pkg(package_t *pkg, void *data) {
     return count;
 }
 
-static size_t           read_payload_resp_file(package_t *pkg, void *data) {
+static size_t           read_payload_resp_file(prot_package_t *pkg, void *data) {
     size_t      count = 0;
     resp_file_t *resp;
 
@@ -299,7 +299,7 @@ static size_t           read_payload_resp_file(package_t *pkg, void *data) {
     return count;
 }
 
-static size_t           read_payload_resp_news(package_t *pkg, void *data) {
+static size_t           read_payload_resp_news(prot_package_t *pkg, void *data) {
     size_t      count = 0;
     resp_news_t *resp;
 
@@ -340,7 +340,7 @@ static size_t           read_payload_resp_news(package_t *pkg, void *data) {
     return count;
 }
 
-static size_t           read_payload_resp_cat(package_t *pkg, void *data) {
+static size_t           read_payload_resp_cat(prot_package_t *pkg, void *data) {
     size_t      count = 0;
     resp_cat_t  *resp;
 
@@ -363,7 +363,7 @@ static size_t           read_payload_resp_cat(package_t *pkg, void *data) {
     return count;
 }
 
-typedef     size_t      (*payload_callback)(package_t *, void *);
+typedef     size_t      (*payload_callback)(prot_package_t *, void *);
 typedef     struct callback_s {
     u8_t               index;
     payload_callback   fn;
@@ -384,7 +384,7 @@ static const        callback_t arr[] = {
     {PKG_TYPE_RESP_CAT, &read_payload_resp_cat}
 };
 
-static size_t   read_payload(package_t *pkg, void *data) {
+static size_t   read_payload(prot_package_t *pkg, void *data) {
     size_t      index;
 
     for (index = 0; index < sizeof(arr) / sizeof(arr[0]); index++)
@@ -395,12 +395,12 @@ static size_t   read_payload(package_t *pkg, void *data) {
     return 0;
 }
 
-package_t      *read_pkg(void *data) {
-    package_t      *pkg;
+prot_package_t      *read_pkg(void *data) {
+    prot_package_t      *pkg;
     size_t          count;
     u8_t            number;
 
-    pkg = malloc(sizeof(package_t));
+    pkg = malloc(sizeof(prot_package_t));
     assert(pkg != NULL);
     pkg->payload = NULL;
     count = read_header(pkg, data);

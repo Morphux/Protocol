@@ -24,10 +24,10 @@ TEST(connect_1) {
 }
 
 TEST(connect_db) {
-    u8_t        ret;
+    u8_t        ret = 0;
 
     db = mpm_database_open(&ret, g_db_path);
-    TEST_ASSERT(ret != 0, "Cannot open the database");
+    TEST_ASSERT(ret == 0, "Cannot open the database");
     return TEST_SUCCESS;
 }
 
@@ -44,7 +44,7 @@ TEST(pkg_auth_1_write) {
 
 TEST(pkg_auth_1_read) {
     void        *ret, *expect;
-    package_t   *pkg;
+    prot_package_t   *pkg;
     auth_t      *auth;
     size_t      r_n = 0, size;
 
@@ -100,7 +100,7 @@ TEST(pkg_req_get_pkg_1_write) {
 
 TEST(pkg_req_get_pkg_1_read) {
     void        *ret, *expect;
-    package_t   *pkg;
+    prot_package_t   *pkg;
     error_pkg_t *err;
     size_t      r_n = 0, size;
 
@@ -119,6 +119,35 @@ TEST(pkg_req_get_pkg_1_read) {
     TEST_ASSERT(err->error_type == ERR_RES_NOT_FOUND, "Error type is wrong");
     TEST_ASSERT(strcmp(err->err, "Package not found") == 0, "Error string is wrong");
     free(ret);
+    return TEST_SUCCESS;
+}
+
+TEST(pkg_req_get_pkg_2_write) {
+    void        *ret;
+    size_t      size;
+
+    TEST_ASSERT(sockfd, "Server is not responding");
+    ret = pkg_build_req_get_pkg(&size, 1, PKG_STABLE, "", "", "");
+    TEST_ASSERT(write(sockfd, ret, size), "Cannot send package to the server");
+    return TEST_SUCCESS;
+}
+
+
+TEST(pkg_req_get_pkg_2_read) {
+    mlist_t     *pkgs = NULL;
+    package_t   *pkg;
+    void        *ret;
+    size_t      r_n = 0, size;
+
+    TEST_ASSERT(sockfd, "Server is not responding");
+    mpm_get_package_by_id(db, 1, &pkgs);
+    pkg = pkgs->member;
+
+    ret = malloc(2048);
+    READ_TIMEOUT(sockfd, ret, 2048, 1, r_n);
+    (void)pkg;
+    (void)size;
+    (void)r_n;
     return TEST_SUCCESS;
 }
 
@@ -144,6 +173,8 @@ void        begin_client_test(void) {
     reg_test("auth", pkg_auth_1_read);
     reg_test("get_pkg", pkg_req_get_pkg_1_write);
     reg_test("get_pkg", pkg_req_get_pkg_1_read);
+    reg_test("get_pkg", pkg_req_get_pkg_2_write);
+    reg_test("get_pkg", pkg_req_get_pkg_2_read);
     reg_test("clean", cleanup_co);
     reg_test("clean", cleanup_db);
     test_all();
