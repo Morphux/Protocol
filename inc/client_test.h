@@ -1,6 +1,7 @@
 #ifndef CLIENT_TEST_H
 # define CLIENT_TEST_H
 # include <morphux.h>
+# include <libmpm.h>
 # include <stdio.h>
 # include <sys/types.h>
 # include <sys/socket.h>
@@ -26,5 +27,6 @@ void    begin_client_test(void);
 
 int     g_port;
 char    *g_ip;
+char    *g_db_path;
 
 #endif /* CLIENT_TEST_H */

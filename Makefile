@@ -1,7 +1,13 @@
 NAME =		protocol_tests
 CC =		gcc
-CFLAGS = 	-Wall -Werror -Wextra -Wno-unused-result -I inc/ -I lib/inc/ -I lib/lib/libmorphux/inc/ -g -O3 -std=c99
-LFLAGS = 	-Llib/ -lmpm
+CFLAGS = 	-Wall -Werror -Wextra -Wno-unused-result \
+		    -I inc/ \
+		    -I lib/inc/ \
+		    -I lib/lib/libmorphux/inc/ \
+		    -I lib/lib/sqlite/ \
+		    -I lib/lib/libconfuse/src/ \
+		    -g -O3 -std=c99
+LFLAGS = 	-Llib/ -lmpm -pthread -ldl
 SRCS = 		$(wildcard src/*.c)
 OBJS =		$(SRCS:%.c=%.o)
 

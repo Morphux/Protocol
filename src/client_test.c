@@ -1,6 +1,7 @@
 #include "client_test.h"
 
-static int      sockfd;
+static int              sockfd;
+static database_t       *db;
 
 TEST(connect_1) {
     struct sockaddr_in serv_addr;
@@ -19,6 +20,14 @@ TEST(connect_1) {
     if (connect(sockfd, &serv_addr, sizeof(serv_addr)) == -1)
         sockfd = 0;
     TEST_ASSERT(sockfd != 0, "Cannot connect to the server");
+    return TEST_SUCCESS;
+}
+
+TEST(connect_db) {
+    u8_t        ret;
+
+    db = mpm_database_open(&ret, g_db_path);
+    TEST_ASSERT(ret != 0, "Cannot open the database");
     return TEST_SUCCESS;
 }
 
@@ -113,14 +122,20 @@ TEST(pkg_req_get_pkg_1_read) {
     return TEST_SUCCESS;
 }
 
-TEST(cleanup) {
+TEST(cleanup_co) {
     TEST_ASSERT(sockfd, "Server is not responding");
     TEST_ASSERT(close(sockfd) != -1, "Cannot close socket");
     return TEST_SUCCESS;
 }
 
+TEST(cleanup_db) {
+    TEST_ASSERT(mpm_database_close(db) == 0, "Cannot close database");
+    return TEST_SUCCESS;
+}
+
 void        begin_client_test(void) {
     reg_test("connect", connect_1);
+    reg_test("connect", connect_db);
     reg_test("auth", pkg_auth_1_write);
     reg_test("auth", pkg_auth_1_read);
     reg_test("auth", pkg_auth_2_write);
@@ -129,7 +144,8 @@ void        begin_client_test(void) {
     reg_test("auth", pkg_auth_1_read);
     reg_test("get_pkg", pkg_req_get_pkg_1_write);
     reg_test("get_pkg", pkg_req_get_pkg_1_read);
-    reg_test("clean", cleanup);
+    reg_test("clean", cleanup_co);
+    reg_test("clean", cleanup_db);
     test_all();
     test_free();
 }
