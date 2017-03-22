@@ -55,7 +55,6 @@ SQL_CALLBACK_DEF(pkg_cb) {
         else
             assert(0);
     }
-
     list_add(*(head), pkg, sizeof(intern_package_t));
     free(pkg);
     return 0;
@@ -194,19 +193,23 @@ TEST(pkg_req_get_pkg_2_write) {
 TEST(pkg_req_get_pkg_2_read) {
     mlist_t     *pkgs = NULL;
     intern_package_t   *pkg;
-    void        *ret;
+    package_t       *ptr;
+    void        *ret = NULL;
     size_t      r_n = 0, size;
     char        *req;
 
     TEST_ASSERT(sockfd, "Server is not responding");
 
-    asprintf(&req, "SELECT * FROM pkgs WHERE id = %d", 1);
+    asprintf(&req, "SELECT * FROM pkgs WHERE id = 1");
     mpm_database_exec(db, req, pkg_cb, &pkgs, &req);
     pkg = pkgs->member;
     READ_TIMEOUT(sockfd, ret, 2048, 1, r_n);
-    (void)pkg;
-    (void)size;
-    (void)r_n;
+
+    ptr = pkg_build_resp_pkg(&size, pkg->id, pkg->sbu, pkg->inst_size,
+        pkg->arch_size, 0, pkg->name, pkg->category, pkg->version, pkg->archive,
+        pkg->arch_hash, 0, NULL);
+    TEST_ASSERT_FMT(memcmp(ptr, ret, size) == 0,
+        "Expected package is wrong %s", print_package(ptr, ret, size, r_n));
     return TEST_SUCCESS;
 }
 
