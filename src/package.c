@@ -138,7 +138,8 @@ void *pkg_build_req_get_upd(size_t *size, u64_t len, u64_t *a_pkgs) {
 
 void *pkg_build_resp_pkg(size_t *size, u64_t id, float comp_time,
         float inst_size, float arch_size, u8_t state, const char *name, 
-        const char *category, const char *version, const char *archive,
+        const char *category, const char *version, const char *description,
+        const char *archive,
         const char *checksum, u16_t dep_size, u64_t *dependencies) {
     resp_pkg_t      *pkg;
     prot_package_t       *ptr;
@@ -152,12 +153,14 @@ void *pkg_build_resp_pkg(size_t *size, u64_t id, float comp_time,
     pkg->name_len = strlen(name);
     pkg->category_len = strlen(name);
     pkg->version_len = strlen(version);
+    pkg->description_len = strlen(description);
     pkg->checksum_len = strlen(checksum);
     pkg->dependencies_size = dep_size;
 
     pkg->name = strdup(name);
     pkg->category = strdup(category);
     pkg->version = strdup(version);
+    pkg->description = strdup(description);
     pkg->archive = strdup(archive);
     pkg->checksum = strdup(checksum);
     pkg->dependencies = malloc(sizeof(*dependencies) * dep_size);

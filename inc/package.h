@@ -153,12 +153,14 @@ typedef struct      resp_pkg_s {
     u16_t       name_len;
     u16_t       category_len;
     u16_t       version_len;
+    u16_t       description_len;
     u16_t       archive_len;
     u16_t       checksum_len;
     u16_t       dependencies_size;
     char        *name;
     char        *category;
     char        *version;
+    char        *description;
     char        *archive;
     char        *checksum;
     u64_t       *dependencies;
@@ -222,7 +224,8 @@ void *pkg_build_req_get_cat(size_t *size, u16_t len, u64_t *a_cat);
 void *pkg_build_req_get_upd(size_t *size, u64_t len, u64_t *a_pkgs);
 void *pkg_build_resp_pkg(size_t *size, u64_t id, float comp_time,
         float inst_size, float arch_size, u8_t state, const char *name, 
-        const char *category, const char *version, const char *archive,
+        const char *category, const char *version, const char *description,
+        const char *archive,
         const char *checksum, u16_t dep_size, u64_t *dependencies);
 void *pkg_build_resp_file(size_t *size, u64_t id, u8_t type, u64_t parent_id,
                             const char *path);

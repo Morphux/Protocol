@@ -206,8 +206,8 @@ TEST(pkg_req_get_pkg_2_read) {
     READ_TIMEOUT(sockfd, ret, 2048, 1, r_n);
 
     ptr = pkg_build_resp_pkg(&size, pkg->id, pkg->sbu, pkg->inst_size,
-        pkg->arch_size, 0, pkg->name, pkg->category, pkg->version, pkg->archive,
-        pkg->arch_hash, 0, NULL);
+        pkg->arch_size, 0, pkg->name, pkg->category, pkg->version, pkg->description,
+        pkg->archive, pkg->arch_hash, 0, NULL);
     TEST_ASSERT_FMT(memcmp(ptr, ret, size) == 0,
         "Expected package is wrong %s", print_package(ptr, ret, size, r_n));
     return TEST_SUCCESS;
