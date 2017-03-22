@@ -1,7 +1,65 @@
 #include "client_test.h"
 
+/**
+0   id             mediumint     0  0
+1   name           varchar(36)   1  0
+2   version        mediumint     0  NULL  0
+3   category       varchar(255)  0  NULL  0
+4   description    TEXT          0  NULL  0
+5   archive        varchar(36)   1  0
+6   SBU            mediumint     0  NULL  0
+7   dependencies   varchar(255)  0  NULL  0
+8   archiveSize    mediumint     0  NULL  0
+9   installedSize  mediumint     0  NULL  0
+10  archiveHash    varchar(36)   1  0
+**/
+
 static int              sockfd;
 static database_t       *db;
+
+/* # define SQL_CALLBACK_DEF(name) static int name(void *context, int col_num, \
+                                        char **col_txt, char **col_name)
+*/
+SQL_CALLBACK_DEF(pkg_cb) {
+    mlist_t     **head = context;
+    intern_package_t    *pkg;
+
+    (void)context;
+    pkg = malloc(sizeof(intern_package_t));
+    assert(pkg != NULL);
+
+    for (u8_t i = 0; i < col_num; i++)
+    {
+        if (strcmp(col_name[i], "id") == 0)
+            pkg->id = strtoull(col_txt[i], (char **)NULL, 10);
+        else if (strcmp(col_name[i], "name") == 0)
+            pkg->name = strdup(col_txt[i]);
+        else if (strcmp(col_name[i], "version") == 0)
+            pkg->version = strdup(col_txt[i]);
+        else if (strcmp(col_name[i], "category") == 0)
+            pkg->category = strdup(col_txt[i]);
+        else if (strcmp(col_name[i], "description") == 0)
+            pkg->description = strdup(col_txt[i]);
+        else if (strcmp(col_name[i], "archive") == 0)
+            pkg->archive = strdup(col_txt[i]);
+        else if (strcmp(col_name[i], "SBU") == 0)
+            pkg->sbu = strtoull(col_txt[i], (char **)NULL, 10);
+        else if (strcmp(col_name[i], "dependencies") == 0)
+            pkg->dependencies = strdup(col_txt[i]);
+        else if (strcmp(col_name[i], "archiveSize") == 0)
+            pkg->arch_size = strtoull(col_txt[i], (char **)NULL, 10);
+        else if (strcmp(col_name[i], "installedSize") == 0)
+            pkg->inst_size = strtoull(col_txt[i], (char **)NULL, 10);
+        else if (strcmp(col_name[i], "archiveHash") == 0)
+            pkg->arch_hash = strdup(col_txt[i]);
+        else
+            assert(0);
+    }
+
+    list_add(*(head), pkg, sizeof(intern_package_t));
+    free(pkg);
+    return 0;
+}
 
 TEST(connect_1) {
     struct sockaddr_in serv_addr;
@@ -135,15 +193,16 @@ TEST(pkg_req_get_pkg_2_write) {
 
 TEST(pkg_req_get_pkg_2_read) {
     mlist_t     *pkgs = NULL;
-    package_t   *pkg;
+    intern_package_t   *pkg;
     void        *ret;
     size_t      r_n = 0, size;
+    char        *req;
 
     TEST_ASSERT(sockfd, "Server is not responding");
-    mpm_get_package_by_id(db, 1, &pkgs);
-    pkg = pkgs->member;
 
-    ret = malloc(2048);
+    asprintf(&req, "SELECT * FROM pkgs WHERE id = %d", 1);
+    mpm_database_exec(db, req, pkg_cb, &pkgs, &req);
+    pkg = pkgs->member;
     READ_TIMEOUT(sockfd, ret, 2048, 1, r_n);
     (void)pkg;
     (void)size;

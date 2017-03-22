@@ -19,6 +19,20 @@
 
 char *print_package(void *exp, void *ret, size_t exp_size, size_t ret_size);
 
+typedef struct      intern_package_s {
+    u64_t       id;
+    char        *name;
+    char        *version;
+    char        *category;
+    char        *description;
+    char        *archive;
+    u16_t       sbu;
+    char        *dependencies;
+    u16_t       arch_size;
+    u16_t       inst_size;
+    char        *arch_hash;
+} intern_package_t;
+
 /* Header */
 typedef struct      prot_package_s {
     u8_t        type;
