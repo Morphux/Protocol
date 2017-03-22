@@ -1,25 +1,8 @@
 #include "client_test.h"
 
-/**
-0   id             mediumint     0  0
-1   name           varchar(36)   1  0
-2   version        mediumint     0  NULL  0
-3   category       varchar(255)  0  NULL  0
-4   description    TEXT          0  NULL  0
-5   archive        varchar(36)   1  0
-6   SBU            mediumint     0  NULL  0
-7   dependencies   varchar(255)  0  NULL  0
-8   archiveSize    mediumint     0  NULL  0
-9   installedSize  mediumint     0  NULL  0
-10  archiveHash    varchar(36)   1  0
-**/
-
 static int              sockfd;
 static database_t       *db;
 
-/* # define SQL_CALLBACK_DEF(name) static int name(void *context, int col_num, \
-                                        char **col_txt, char **col_name)
-*/
 SQL_CALLBACK_DEF(pkg_cb) {
     mlist_t     **head = context;
     intern_package_t    *pkg;
