@@ -38,6 +38,20 @@ SQL_CALLBACK_DEF(pkg_cb) {
         else
             assert(0);
     }
+
+    char *tmp = pkg->dependencies, *token;
+    u16_t       i = 0;
+    while ((token = strtok_r(tmp, ", ", &tmp)) != NULL)
+        i++;
+
+    pkg->dependencies_arr = malloc(sizeof(u64_t) * i);
+    tmp = pkg->dependencies;
+    i = 0;
+
+    while ((token = strtok_r(tmp, ", ", &tmp)) != NULL)
+        pkg->dependencies_arr[i++] = strtoull(token, (char **)NULL, 10);
+
+    pkg->dependencies_arr_size = i;
     list_add(*(head), pkg, sizeof(intern_package_t));
     free(pkg);
     return 0;
@@ -190,7 +204,8 @@ TEST(pkg_req_get_pkg_2_read) {
 
     ptr = pkg_build_resp_pkg(&size, pkg->id, pkg->sbu, pkg->inst_size,
         pkg->arch_size, 0, pkg->name, pkg->category, pkg->version, pkg->description,
-        pkg->archive, pkg->arch_hash, 0, NULL);
+        pkg->archive, pkg->arch_hash, pkg->dependencies_arr_size,
+        pkg->dependencies_arr);
     TEST_ASSERT_FMT(memcmp(ptr, ret, size) == 0,
         "Expected package is wrong %s", print_package(ptr, ret, size, r_n));
     return TEST_SUCCESS;

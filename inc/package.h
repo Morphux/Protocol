@@ -31,6 +31,9 @@ typedef struct      intern_package_s {
     u16_t       arch_size;
     u16_t       inst_size;
     char        *arch_hash;
+    u64_t       *dependencies_arr;
+    u16_t       dependencies_arr_size;
+
 } intern_package_t;
 
 /* Header */
