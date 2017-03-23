@@ -31,12 +31,17 @@ SQL_CALLBACK_DEF(pkg_cb) {
             pkg->dependencies = strdup(col_txt[i]);
         else if (strcmp(col_name[i], "archiveSize") == 0)
             pkg->arch_size = strtoull(col_txt[i], (char **)NULL, 10);
-        else if (strcmp(col_name[i], "installedSize") == 0)
+        else if (strcmp(col_name[i], "InstalledSize") == 0)
             pkg->inst_size = strtoull(col_txt[i], (char **)NULL, 10);
         else if (strcmp(col_name[i], "archiveHash") == 0)
             pkg->arch_hash = strdup(col_txt[i]);
+        else if (strcmp(col_name[i], "state") == 0)
+            pkg->state = PKG_STABLE;
         else
+        {
+            printf("Unknown column: %s", col_name[i]);
             assert(0);
+        }
     }
 
     char *tmp = pkg->dependencies, *token;
@@ -203,7 +208,7 @@ TEST(pkg_req_get_pkg_2_read) {
     READ_TIMEOUT(sockfd, ret, 2048, 1, r_n);
 
     ptr = pkg_build_resp_pkg(&size, pkg->id, pkg->sbu, pkg->inst_size,
-        pkg->arch_size, 0, pkg->name, pkg->category, pkg->version, pkg->description,
+        pkg->arch_size, pkg->state, pkg->name, pkg->category, pkg->version, pkg->description,
         pkg->archive, pkg->arch_hash, pkg->dependencies_arr_size,
         pkg->dependencies_arr);
     TEST_ASSERT_FMT(memcmp(ptr, ret, size) == 0,
@@ -227,7 +232,7 @@ TEST(pkg_req_get_pkg_test_all) {
         free(ret);
         READ_TIMEOUT(sockfd, ret, 2048, 1, r_n);
         ptr = pkg_build_resp_pkg(&size, pkg->id, pkg->sbu, pkg->inst_size,
-            pkg->arch_size, 0, pkg->name, pkg->category, pkg->version, pkg->description,
+            pkg->arch_size, pkg->state, pkg->name, pkg->category, pkg->version, pkg->description,
             pkg->archive, pkg->arch_hash, pkg->dependencies_arr_size,
             pkg->dependencies_arr);
         TEST_ASSERT_FMT(memcmp(ptr, ret, size) == 0,

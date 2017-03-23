@@ -33,7 +33,7 @@ typedef struct      intern_package_s {
     char        *arch_hash;
     u64_t       *dependencies_arr;
     u16_t       dependencies_arr_size;
-
+    u8_t        state;
 } intern_package_t;
 
 /* Header */
