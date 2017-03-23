@@ -211,6 +211,34 @@ TEST(pkg_req_get_pkg_2_read) {
     return TEST_SUCCESS;
 }
 
+TEST(pkg_req_get_pkg_test_all) {
+    mlist_t             *pkgs = NULL, *tmp;
+    intern_package_t    *pkg;
+    package_t           *ptr;
+    void                *ret = NULL;
+    size_t              r_n = 0, size;
+
+    (void)r_n;
+    TEST_ASSERT(sockfd, "Server is not responding");
+    mpm_database_exec(db, "SELECT * FROM pkgs", pkg_cb, &pkgs, (char **)NULL);
+    list_for_each(pkgs, tmp, pkg) {
+        ret = pkg_build_req_get_pkg(&size, pkg->id, PKG_STABLE, "", "", "");
+        TEST_ASSERT(write(sockfd, ret, size), "Cannot send package to the server");
+        free(ret);
+        READ_TIMEOUT(sockfd, ret, 2048, 1, r_n);
+        ptr = pkg_build_resp_pkg(&size, pkg->id, pkg->sbu, pkg->inst_size,
+            pkg->arch_size, 0, pkg->name, pkg->category, pkg->version, pkg->description,
+            pkg->archive, pkg->arch_hash, pkg->dependencies_arr_size,
+            pkg->dependencies_arr);
+        TEST_ASSERT_FMT(memcmp(ptr, ret, size) == 0,
+            "Expected package is wrong %s", print_package(ptr, ret, size, r_n));
+        free(ret);
+        free(ptr);
+    }
+    return TEST_SUCCESS;
+
+}
+
 TEST(cleanup_co) {
     TEST_ASSERT(sockfd, "Server is not responding");
     TEST_ASSERT(close(sockfd) != -1, "Cannot close socket");
@@ -235,6 +263,7 @@ void        begin_client_test(void) {
     reg_test("get_pkg", pkg_req_get_pkg_1_read);
     reg_test("get_pkg", pkg_req_get_pkg_2_write);
     reg_test("get_pkg", pkg_req_get_pkg_2_read);
+    reg_test("get_pkg", pkg_req_get_pkg_test_all);
     reg_test("clean", cleanup_co);
     reg_test("clean", cleanup_db);
     test_all();
