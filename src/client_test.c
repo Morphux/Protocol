@@ -211,6 +211,7 @@ TEST(pkg_req_get_pkg_2_read) {
         pkg->arch_size, pkg->state, pkg->name, pkg->category, pkg->version, pkg->description,
         pkg->archive, pkg->arch_hash, pkg->dependencies_arr_size,
         pkg->dependencies_arr);
+    TEST_ASSERT(ret != 0, "Server returned nothing");
     TEST_ASSERT_FMT(memcmp(ptr, ret, size) == 0,
         "Expected package is wrong %s", print_package(ptr, ret, size, r_n));
     return TEST_SUCCESS;
