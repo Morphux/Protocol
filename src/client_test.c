@@ -199,6 +199,7 @@ TEST(pkg_req_get_pkg_2_read) {
 
     TEST_ASSERT(sockfd, "Server is not responding");
 
+    ret = malloc(2048);
     asprintf(&req, "SELECT * FROM pkgs WHERE id = 1");
     mpm_database_exec(db, req, pkg_cb, &pkgs, &req);
     pkg = pkgs->member;
@@ -208,9 +209,10 @@ TEST(pkg_req_get_pkg_2_read) {
         pkg->arch_size, pkg->state, pkg->name, pkg->category, pkg->version, pkg->description,
         pkg->archive, pkg->arch_hash, pkg->dependencies_arr_size,
         pkg->dependencies_arr);
-    TEST_ASSERT(ret != 0, "Server returned nothing");
+    printf("\n%zu\n", size);
     TEST_ASSERT_FMT(memcmp(ptr, ret, size) == 0,
         "Expected package is wrong %s", print_package(ptr, ret, size, r_n));
+    free(ret);
     return TEST_SUCCESS;
 }
 
@@ -228,6 +230,7 @@ TEST(pkg_req_get_pkg_test_all) {
         ret = pkg_build_req_get_pkg(&size, pkg->id, PKG_STABLE, "", "", "");
         TEST_ASSERT(write(sockfd, ret, size), "Cannot send package to the server");
         free(ret);
+        ret = malloc(2048);
         READ_TIMEOUT(sockfd, ret, 2048, 1, r_n);
         ptr = pkg_build_resp_pkg(&size, pkg->id, pkg->sbu, pkg->inst_size,
             pkg->arch_size, pkg->state, pkg->name, pkg->category, pkg->version, pkg->description,

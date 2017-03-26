@@ -237,20 +237,20 @@ char *print_package(void *exp, void *ret, size_t exp_size, size_t ret_size) {
     char        *s_exp = exp, *s_ret = ret;
     size_t      max_size = (ret_size > exp_size ? ret_size : exp_size);
 
-    res = strdup("\n> ");
+    res = strdup("\n ");
     for (size_t i = 0; i < exp_size; i++) {
-        asprintf(&res, "%s%02x ", res, s_exp[i]);
-        if (i % 10 == 0 && i != 0)
+        asprintf(&res, "%s%02X ", res, (unsigned char)s_exp[i]);
+        if ((i + 1) % 10 == 0 && i != 0)
             asprintf(&res, "%s\n ",res);
     }
-    asprintf(&res, "%s\n> ",res);
+    asprintf(&res, "%s\n ",res);
     fflush(stdout);
     for (size_t i = 0; i < ret_size; i++) {
         if (i < max_size && s_ret[i] != s_exp[i])
-            asprintf(&res, "%s\033[0;31m%02x\033[0;37m ", res, s_ret[i]);
+            asprintf(&res, "%s\033[0;31m%02x\033[0;37m ", res, (unsigned char)s_ret[i]);
         else
-            asprintf(&res, "%s%02x ", res, s_ret[i]);
-        if (i % 10 == 0 && i != 0)
+            asprintf(&res, "%s%02X ", res, (unsigned char)s_ret[i]);
+        if ((i + 1) % 10 == 0 && i != 0)
             asprintf(&res, "%s\n ",res);
     }
     asprintf(&res, "%s\n ",res);
