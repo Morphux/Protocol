@@ -31,7 +31,7 @@ SQL_CALLBACK_DEF(pkg_cb) {
             pkg->dependencies = strdup(col_txt[i]);
         else if (strcmp(col_name[i], "archiveSize") == 0)
             pkg->arch_size = strtoull(col_txt[i], (char **)NULL, 10);
-        else if (strcmp(col_name[i], "InstalledSize") == 0)
+        else if (strcmp(col_name[i], "installedSize") == 0)
             pkg->inst_size = strtoull(col_txt[i], (char **)NULL, 10);
         else if (strcmp(col_name[i], "archiveHash") == 0)
             pkg->arch_hash = strdup(col_txt[i]);
@@ -164,7 +164,7 @@ TEST(pkg_req_get_pkg_1_read) {
     size_t      r_n = 0, size;
 
     TEST_ASSERT(sockfd, "Server is not responding");
-    expect = pkg_build_error(&size, ERR_RES_NOT_FOUND, "Package not found");
+    expect = pkg_build_error(&size, ERR_MALFORMED_PACKET, "A packet send by the client is wrong");
     ret = malloc(2048);
 
     READ_TIMEOUT(sockfd, ret, 2048, 1, r_n);

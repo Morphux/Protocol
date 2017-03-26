@@ -86,10 +86,10 @@ typedef struct      error_pkg_s {
 
 /* Error possible types */
 typedef enum        error_type_e {
-    ERR_SERVER_FAULT = 1,
-    ERR_MALFORMED_PACKET,
-    ERR_RES_NOT_FOUND,
-    ERR_END
+    ERR_SERVER_FAULT = 0x1,
+    ERR_MALFORMED_PACKET = 0x2,
+    ERR_RES_NOT_FOUND = 0x3,
+    ERR_END = 0x4
 }         SF_PACKED error_type_t;
 
 typedef struct      req_get_pkg_s {
@@ -110,10 +110,10 @@ typedef struct      req_get_pkg_s {
 
 /* Stability of packages */
 typedef enum        prot_package_state_e {
-    PKG_STABLE = 1,
-    PKG_UNSTABLE,
-    PKG_DEV,
-    PKG_END
+    PKG_STABLE = 0x1,
+    PKG_UNSTABLE = 0x2,
+    PKG_DEV = 0x3,
+    PKG_END = 0x4
 }                   prot_package_state_t;
 
 typedef struct      req_get_file_s {
