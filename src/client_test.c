@@ -162,7 +162,6 @@ TEST(pkg_req_get_pkg_1_write) {
 TEST(pkg_req_get_pkg_1_read) {
     void        *ret, *expect;
     prot_package_t   *pkg;
-    error_pkg_t *err;
     size_t      r_n = 0, size;
 
     TEST_ASSERT(sockfd, "Server is not responding");
