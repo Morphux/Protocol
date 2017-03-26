@@ -162,7 +162,7 @@ static void     *write_payload_resp_pkg(void *pkg, size_t *count) {
             resp->version_len +
             resp->archive_len +
             resp->checksum_len +
-            sizeof(resp->dependencies_size) * sizeof(*resp->dependencies)
+            sizeof(resp->dependencies_size) * sizeof(*resp->dependencies) + 100
         );
     assert(ret != NULL);
     write_member(resp->id, ret, *count);

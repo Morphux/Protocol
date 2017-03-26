@@ -3,6 +3,7 @@
 
 # include <morphux.h>
 # include "protocol_test.h"
+# include <ctype.h>
 
 # define read_member(mem) memcpy(&(mem), data + count, sizeof(mem)); \
                             count += sizeof(mem);

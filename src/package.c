@@ -151,7 +151,7 @@ void *pkg_build_resp_pkg(size_t *size, u64_t id, float comp_time,
     pkg->arch_size = arch_size;
     pkg->state = state;
     pkg->name_len = strlen(name);
-    pkg->category_len = strlen(name);
+    pkg->category_len = strlen(category);
     pkg->version_len = strlen(version);
     pkg->description_len = strlen(description);
     pkg->checksum_len = strlen(checksum);
@@ -241,9 +241,18 @@ char *print_package(void *exp, void *ret, size_t exp_size, size_t ret_size) {
     for (size_t i = 0; i < exp_size; i++) {
         asprintf(&res, "%s%02X ", res, (unsigned char)s_exp[i]);
         if ((i + 1) % 10 == 0 && i != 0)
+        {
+            for (size_t j = (i + 1) - 10; j < i + 1; j++)
+            {
+                if (isprint(s_exp[j]))
+                    asprintf(&res, "%s%c", res, (unsigned char)s_exp[j]);
+                else
+                    asprintf(&res, "%s.", res);
+            }
             asprintf(&res, "%s\n ",res);
+        }
     }
-    asprintf(&res, "%s\n ",res);
+    asprintf(&res, "%s\n\n ",res);
     fflush(stdout);
     for (size_t i = 0; i < ret_size; i++) {
         if (i < max_size && s_ret[i] != s_exp[i])
@@ -251,7 +260,16 @@ char *print_package(void *exp, void *ret, size_t exp_size, size_t ret_size) {
         else
             asprintf(&res, "%s%02X ", res, (unsigned char)s_ret[i]);
         if ((i + 1) % 10 == 0 && i != 0)
+        {
+            for (size_t j = (i + 1) - 10; j < i + 1; j++)
+            {
+                if (isprint(s_ret[j]))
+                    asprintf(&res, "%s%c", res, (unsigned char)s_ret[j]);
+                else
+                    asprintf(&res, "%s.", res);
+            }
             asprintf(&res, "%s\n ",res);
+        }
     }
     asprintf(&res, "%s\n ",res);
     return res;

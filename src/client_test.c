@@ -36,7 +36,7 @@ SQL_CALLBACK_DEF(pkg_cb) {
         else if (strcmp(col_name[i], "archiveHash") == 0)
             pkg->arch_hash = strdup(col_txt[i]);
         else if (strcmp(col_name[i], "state") == 0)
-            pkg->state = PKG_STABLE;
+            pkg->state = strtoull(col_txt[i], (char **)NULL, 10);
         else if (strcmp(col_name[i], "timeAddPkg") == 0)
             ;
         else
@@ -209,7 +209,6 @@ TEST(pkg_req_get_pkg_2_read) {
         pkg->arch_size, pkg->state, pkg->name, pkg->category, pkg->version, pkg->description,
         pkg->archive, pkg->arch_hash, pkg->dependencies_arr_size,
         pkg->dependencies_arr);
-    printf("\n%zu\n", size);
     TEST_ASSERT_FMT(memcmp(ptr, ret, size) == 0,
         "Expected package is wrong %s", print_package(ptr, ret, size, r_n));
     free(ret);
@@ -269,7 +268,7 @@ void        begin_client_test(void) {
     reg_test("get_pkg", pkg_req_get_pkg_1_read);
     reg_test("get_pkg", pkg_req_get_pkg_2_write);
     reg_test("get_pkg", pkg_req_get_pkg_2_read);
-    reg_test("get_pkg", pkg_req_get_pkg_test_all);
+    /*reg_test("get_pkg", pkg_req_get_pkg_test_all);*/
     reg_test("clean", cleanup_co);
     reg_test("clean", cleanup_db);
     test_all();
