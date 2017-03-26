@@ -156,6 +156,7 @@ void *pkg_build_resp_pkg(size_t *size, u64_t id, float comp_time,
     pkg->description_len = strlen(description);
     pkg->checksum_len = strlen(checksum);
     pkg->dependencies_size = dep_size;
+    pkg->archive_len = strlen(archive);
 
     pkg->name = strdup(name);
     pkg->category = strdup(category);
@@ -239,7 +240,7 @@ char *print_package(void *exp, void *ret, size_t exp_size, size_t ret_size) {
 
     res = strdup("\n ");
     for (size_t i = 0; i < exp_size; i++) {
-        asprintf(&res, "%s%02X ", res, (unsigned char)s_exp[i]);
+        asprintf(&res, "%s%02x ", res, (unsigned char)s_exp[i]);
         if ((i + 1) % 10 == 0 && i != 0)
         {
             for (size_t j = (i + 1) - 10; j < i + 1; j++)
@@ -258,7 +259,7 @@ char *print_package(void *exp, void *ret, size_t exp_size, size_t ret_size) {
         if (i < max_size && s_ret[i] != s_exp[i])
             asprintf(&res, "%s\033[0;31m%02x\033[0;37m ", res, (unsigned char)s_ret[i]);
         else
-            asprintf(&res, "%s%02X ", res, (unsigned char)s_ret[i]);
+            asprintf(&res, "%s%02x ", res, (unsigned char)s_ret[i]);
         if ((i + 1) % 10 == 0 && i != 0)
         {
             for (size_t j = (i + 1) - 10; j < i + 1; j++)

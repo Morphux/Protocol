@@ -46,7 +46,7 @@ SQL_CALLBACK_DEF(pkg_cb) {
         }
     }
 
-    char *tmp = pkg->dependencies, *token;
+    char *tmp = strdup(pkg->dependencies), *token;
     u16_t       i = 0;
     while ((token = strtok_r(tmp, ", ", &tmp)) != NULL)
         i++;
@@ -205,7 +205,7 @@ TEST(pkg_req_get_pkg_2_read) {
     pkg = pkgs->member;
     READ_TIMEOUT(sockfd, ret, 2048, 1, r_n);
 
-    ptr = pkg_build_resp_pkg(&size, pkg->id, pkg->sbu, pkg->inst_size,
+   ptr = pkg_build_resp_pkg(&size, pkg->id, pkg->sbu, pkg->inst_size,
         pkg->arch_size, pkg->state, pkg->name, pkg->category, pkg->version, pkg->description,
         pkg->archive, pkg->arch_hash, pkg->dependencies_arr_size,
         pkg->dependencies_arr);
