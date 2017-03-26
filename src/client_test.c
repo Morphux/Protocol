@@ -37,6 +37,8 @@ SQL_CALLBACK_DEF(pkg_cb) {
             pkg->arch_hash = strdup(col_txt[i]);
         else if (strcmp(col_name[i], "state") == 0)
             pkg->state = PKG_STABLE;
+        else if (strcmp(col_name[i], "timeAddPkg") == 0)
+            ;
         else
         {
             printf("Unknown column: %s", col_name[i]);
