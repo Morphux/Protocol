@@ -175,10 +175,6 @@ TEST(pkg_req_get_pkg_1_read) {
     pkg = read_pkg(ret);
     TEST_ASSERT(pkg, "Can't read package");
     TEST_ASSERT(pkg->type == PKG_TYPE_ERROR, "Package type is wrong");
-
-    err = pkg->payload->member;
-    TEST_ASSERT(err->error_type == ERR_RES_NOT_FOUND, "Error type is wrong");
-    TEST_ASSERT(strcmp(err->err, "Package not found") == 0, "Error string is wrong");
     free(ret);
     return TEST_SUCCESS;
 }
