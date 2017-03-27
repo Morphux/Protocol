@@ -4,22 +4,48 @@
 #define CLIENT_CMD "client"
 #define SERV_CMD   "server"
 
-static void callback_port(const char *p) {
+static bool callback_port(const char *p) {
     g_port = atoi(p);
+    if (g_port != 0)
+        return true;
+    return false;
 }
 
-static void callback_ip(const char *ip) {
+static bool callback_ip(const char *ip) {
     g_ip = strdup(ip);
+    return true;
 }
 
-static void callback_db(const char *db) {
+static bool callback_db(const char *db) {
     g_db_path = strdup(db);
+    return true;
 }
 
 static const mopts_t    opts[] = {
-    {'p', "port", "Port", true, &callback_port},
-    {'a', "ip", "IP Address", true, &callback_ip},
-    {'d', "database", "Database Path", true, &callback_db},
+    {
+        .opt = 'p',
+        .s_opt = "port",
+        .desc = "Port",
+        .take_arg = true,
+        .callback = &callback_port,
+        .usage = "PORT"
+    },
+    {
+        .opt = 'a',
+        .s_opt = "ip",
+        .desc = "IP Address",
+        .take_arg = true,
+        .callback = &callback_ip,
+        .usage = "IP"
+    },
+    {
+        .opt = 'd',
+        .s_opt = "database",
+        .desc = "Database Path",
+        .take_arg = true,
+        .callback = &callback_db,
+        .usage = "DB_FILE"
+    },
     ARGS_EOL
 };
 
@@ -34,6 +60,7 @@ int     main(int ac, char **av) {
     g_port = 0;
     g_ip = NULL;
     g_db_path = NULL;
+    set_program_name("protocol");
     read_opt(ac, av, opts, &list);
 
     if (g_port == 0 || g_ip == NULL || g_db_path == NULL)
