@@ -26,13 +26,13 @@ SQL_CALLBACK_DEF(pkg_cb) {
         else if (strcmp(col_name[i], "archive") == 0)
             pkg->archive = strdup(col_txt[i]);
         else if (strcmp(col_name[i], "SBU") == 0)
-            pkg->sbu = strtoull(col_txt[i], (char **)NULL, 10);
+            pkg->sbu = atof(col_txt[i]);
         else if (strcmp(col_name[i], "dependencies") == 0)
             pkg->dependencies = strdup(col_txt[i]);
         else if (strcmp(col_name[i], "archiveSize") == 0)
-            pkg->arch_size = strtoull(col_txt[i], (char **)NULL, 10);
+            pkg->arch_size = atof(col_txt[i]);
         else if (strcmp(col_name[i], "installedSize") == 0)
-            pkg->inst_size = strtoull(col_txt[i], (char **)NULL, 10);
+            pkg->inst_size = atof(col_txt[i]);
         else if (strcmp(col_name[i], "archiveHash") == 0)
             pkg->arch_hash = strdup(col_txt[i]);
         else if (strcmp(col_name[i], "state") == 0)
