@@ -1,5 +1,19 @@
 #include "package.h"
 
+static float reverse_float(const float in_float) {
+   float ret_val;
+   char *floatToConvert = (char *)&in_float;
+   char *returnFloat = (char *)&ret_val;
+
+   returnFloat[0] = floatToConvert[3];
+   returnFloat[1] = floatToConvert[2];
+   returnFloat[2] = floatToConvert[1];
+   returnFloat[3] = floatToConvert[0];
+
+   return ret_val;
+}
+
+
 static void *write_header(prot_package_t *pkg, size_t *count) {
     void    *header;
 
@@ -165,6 +179,9 @@ static void     *write_payload_resp_pkg(void *pkg, size_t *count) {
             sizeof(resp->dependencies_size) * sizeof(*resp->dependencies) + 100
         );
     assert(ret != NULL);
+    resp->comp_time = reverse_float(resp->comp_time);
+    resp->inst_size = reverse_float(resp->inst_size);
+    resp->arch_size = reverse_float(resp->arch_size);
     write_member(resp->id, ret, *count);
     write_member(resp->comp_time, ret, *count);
     write_member(resp->inst_size, ret, *count);
@@ -185,7 +202,7 @@ static void     *write_payload_resp_pkg(void *pkg, size_t *count) {
 
     for (u16_t i = 0; i < resp->dependencies_size; i++) {
         memcpy(ret + *count, &resp->dependencies[i], sizeof(resp->dependencies[i]));
-        *count += sizeof(resp->dependencies[i]);
+        *count += sizeof(u64_t);
     }
 
     return ret;

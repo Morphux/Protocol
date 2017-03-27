@@ -27,10 +27,10 @@ typedef struct      intern_package_s {
     char        *category;
     char        *description;
     char        *archive;
-    u16_t       sbu;
+    float       sbu;
     char        *dependencies;
-    u16_t       arch_size;
-    u16_t       inst_size;
+    float       arch_size;
+    float       inst_size;
     char        *arch_hash;
     u64_t       *dependencies_arr;
     u16_t       dependencies_arr_size;

@@ -188,7 +188,6 @@ TEST(pkg_req_get_pkg_2_write) {
     return TEST_SUCCESS;
 }
 
-
 TEST(pkg_req_get_pkg_2_read) {
     mlist_t     *pkgs = NULL;
     intern_package_t   *pkg;
@@ -236,7 +235,7 @@ TEST(pkg_req_get_pkg_test_all) {
             pkg->archive, pkg->arch_hash, pkg->dependencies_arr_size,
             pkg->dependencies_arr);
         TEST_ASSERT_FMT(memcmp(ptr, ret, size) == 0,
-            "Expected package is wrong %s", print_package(ptr, ret, size, r_n));
+            "Expected package is wrong (ID: %llu): %s", pkg->id, print_package(ptr, ret, size, r_n));
         free(ret);
         free(ptr);
     }
@@ -268,7 +267,7 @@ void        begin_client_test(void) {
     reg_test("get_pkg", pkg_req_get_pkg_1_read);
     reg_test("get_pkg", pkg_req_get_pkg_2_write);
     reg_test("get_pkg", pkg_req_get_pkg_2_read);
-    /*reg_test("get_pkg", pkg_req_get_pkg_test_all);*/
+    reg_test("get_pkg", pkg_req_get_pkg_test_all);
     reg_test("clean", cleanup_co);
     reg_test("clean", cleanup_db);
     test_all();
