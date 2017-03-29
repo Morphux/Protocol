@@ -255,6 +255,8 @@ TEST(cleanup_db) {
 }
 
 void        begin_client_test(void) {
+    u32_t ret;
+
     reg_test("connect", connect_1);
     reg_test("connect", connect_db);
     reg_test("auth", pkg_auth_1_write);
@@ -270,6 +272,7 @@ void        begin_client_test(void) {
     reg_test("get_pkg", pkg_req_get_pkg_test_all);
     reg_test("clean", cleanup_co);
     reg_test("clean", cleanup_db);
-    test_all();
+    ret = test_all();
     test_free();
+    exit(ret);
 }
