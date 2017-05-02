@@ -99,6 +99,7 @@ TEST(connect_1) {
     /* Connect to the server */
     if (mbedtls_net_connect(&sockfd, g_ip, g_port, MBEDTLS_NET_PROTO_TCP) != 0)
     {
+        sockfd.fd = 0;
         TEST_ASSERT(false, "Cannot Connect to the server");
     }
 
