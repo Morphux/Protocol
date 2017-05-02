@@ -21,7 +21,8 @@
                         timeout.tv_usec = 0; \
                         rv = select(sockfd + 1, &set, NULL, NULL, &timeout); \
                         TEST_ASSERT(rv > 0, "Timeout on read"); \
-                        r_n = read(sockfd, ret, size);
+                        r_n = read(sockfd, ret, size); \
+                        if (r_n == 0) { close(sockfd); sockfd = 0; }
 
 
 void    begin_client_test(void);
