@@ -6,8 +6,9 @@ CFLAGS = 	-Wall -Werror -Wextra -Wno-unused-result \
 		    -I lib/lib/libmorphux/inc/ \
 		    -I lib/lib/sqlite/ \
 		    -I lib/lib/libconfuse/src/ \
+		    -I ./mbedtls/include \
 		    -g -O3 -std=c99
-LFLAGS = 	-Llib/ -lmpm -pthread -ldl
+LFLAGS = 	-Llib/ -lmpm -pthread -ldl -Lmbedtls/library -lmbedx509 -lmbedtls -lmbedcrypto 
 SRCS = 		$(wildcard src/*.c)
 OBJS =		$(SRCS:%.c=%.o)
 
@@ -19,6 +20,7 @@ $(NAME): $(OBJS)
 
 init:
 	make -C lib/ init
+	make -C mbedtls
 
 clean:
 	rm -f $(OBJS)

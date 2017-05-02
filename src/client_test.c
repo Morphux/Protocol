@@ -1,6 +1,5 @@
 #include "client_test.h"
 
-static int              sockfd;
 static database_t       *db;
 
 SQL_CALLBACK_DEF(pkg_cb) {
@@ -64,23 +63,97 @@ SQL_CALLBACK_DEF(pkg_cb) {
     return 0;
 }
 
-TEST(connect_1) {
-    struct sockaddr_in serv_addr;
-    struct hostent *server;
+static mbedtls_net_context      sockfd;
+static mbedtls_entropy_context  entropy;
+static mbedtls_ctr_drbg_context ctr_drbg;
+static mbedtls_ssl_context      ssl;
+static mbedtls_ssl_config       conf;
+static mbedtls_x509_crt         cacert;
 
-    sockfd = socket(AF_INET, SOCK_STREAM, 0);
-    TEST_ASSERT(sockfd > 0, "Cannot open socket");
-    server = gethostbyname(g_ip);
-    TEST_ASSERT(server != NULL, "Address doesn't exist");
-    bzero((char *)&serv_addr, sizeof(serv_addr));
-    serv_addr.sin_family = AF_INET;
-    bcopy((char *)server->h_addr,
-      (char *)&serv_addr.sin_addr.s_addr,
-      server->h_length);
-    serv_addr.sin_port = htons(g_port);
-    if (connect(sockfd, &serv_addr, sizeof(serv_addr)) == -1)
-        sockfd = 0;
-    TEST_ASSERT(sockfd != 0, "Cannot connect to the server");
+TEST(connect_1) {
+    const char *pers = "ssl_client1";
+
+    /* Init SSL */
+    mbedtls_net_init(&sockfd);
+    mbedtls_ssl_init(&ssl);
+    mbedtls_ssl_config_init(&conf);
+    mbedtls_x509_crt_init(&cacert);
+    mbedtls_ctr_drbg_init(&ctr_drbg);
+
+    /* Init entropy */
+    mbedtls_entropy_init(&entropy);
+
+    if (mbedtls_ctr_drbg_seed(&ctr_drbg, mbedtls_entropy_func, &entropy,
+                           (const unsigned char *)pers,
+                           strlen(pers)) != 0)
+    {
+        TEST_ASSERT(false, "Cannot init entropy");
+    }
+
+    /* Load certificates */
+    if (mbedtls_x509_crt_parse_file(&cacert, g_cert) != 0)
+    {
+        TEST_ASSERT(false, "Cannot load certificate");
+    }
+
+    /* Connect to the server */
+    if (mbedtls_net_connect(&sockfd, g_ip, g_port, MBEDTLS_NET_PROTO_TCP) != 0)
+    {
+        TEST_ASSERT(false, "Cannot Connect to the server");
+    }
+
+    /* Setup */
+    if (mbedtls_ssl_config_defaults(&conf,
+                    MBEDTLS_SSL_IS_CLIENT,
+                    MBEDTLS_SSL_TRANSPORT_STREAM,
+                    MBEDTLS_SSL_PRESET_DEFAULT) != 0)
+    {
+        sockfd.fd = 0;
+        TEST_ASSERT(false, "Cannot configure SSL");
+    }
+
+    mbedtls_ssl_conf_ca_chain(&conf, &cacert, NULL);
+    mbedtls_ssl_conf_rng(&conf, mbedtls_ctr_drbg_random, &ctr_drbg);
+
+    if (mbedtls_ssl_setup(&ssl, &conf) != 0)
+    {
+        sockfd.fd = 0;
+        TEST_ASSERT(false, "Cannot setup SSL");
+    }
+
+    if (mbedtls_ssl_set_hostname(&ssl, g_ip) != 0)
+    {
+        sockfd.fd = 0;
+        TEST_ASSERT(false, "Cannot set certificate hostname");
+    }
+
+    mbedtls_ssl_set_bio(&ssl, &sockfd, mbedtls_net_send, mbedtls_net_recv, NULL);
+
+    /* Handshake */
+    int ret;
+
+    while ((ret = mbedtls_ssl_handshake(&ssl)) != 0)
+    {
+        if (ret != MBEDTLS_ERR_SSL_WANT_READ && ret != MBEDTLS_ERR_SSL_WANT_WRITE)
+        {
+            char        buffer[150];
+            mbedtls_strerror(-ret, buffer, 150);
+            sockfd.fd = 0;
+            TEST_ASSERT_FMT(false, "Bad Handshake: -0x%x (%s)", -ret, buffer);
+        }
+    }
+
+    /* Check server certificate */
+    int flags;
+
+    if ((flags = mbedtls_ssl_get_verify_result(&ssl)) != 0)
+    {
+        char vrfy_buf[512];
+        mbedtls_x509_crt_verify_info( vrfy_buf, sizeof( vrfy_buf ), ": ", flags );
+        sockfd.fd = 0;
+        TEST_ASSERT_FMT(false, "Cannot verify the server certificate %s", vrfy_buf);
+    }
+
     return TEST_SUCCESS;
 }
 
@@ -96,9 +169,9 @@ TEST(pkg_auth_1_write) {
     size_t          size;
     void            *ret;
 
-    TEST_ASSERT(sockfd, "Server is not responding");
+    TEST_ASSERT(sockfd.fd, "Server is not responding");
     ret = pkg_build_auth(&size, 1, 0);
-    TEST_ASSERT(write(sockfd, ret, size) != 0,
+    TEST_ASSERT(mbedtls_ssl_write(&ssl, ret, size) != 0,
         "Cannot send package to the server");
     return TEST_SUCCESS;
 }
@@ -109,11 +182,11 @@ TEST(pkg_auth_1_read) {
     auth_t      *auth;
     size_t      r_n = 0, size;
 
-    TEST_ASSERT(sockfd, "Server is not responding");
+    TEST_ASSERT(sockfd.fd, "Server is not responding");
     expect = pkg_build_auth_ack(&size, 1, 0);
     ret = malloc(2048);
 
-    READ_TIMEOUT(sockfd, ret, 2048, 1, r_n);
+    READ_TIMEOUT(&sockfd, &ssl, ret, 2048, 1, r_n);
     TEST_ASSERT_FMT(memcmp(ret, expect, size) == 0,
         "Expected package is wrong %s", print_package(expect, ret, size, r_n));
     pkg = read_pkg(ret);
@@ -131,9 +204,9 @@ TEST(pkg_auth_2_write) {
     size_t          size;
     void            *ret;
 
-    TEST_ASSERT(sockfd, "Server is not responding");
+    TEST_ASSERT(sockfd.fd, "Server is not responding");
     ret = pkg_build_auth(&size, 1, 1);
-    TEST_ASSERT(write(sockfd, ret, size) != 0,
+    TEST_ASSERT(mbedtls_ssl_write(&ssl, ret, size) != 0,
         "Cannot send package to the server");
     return TEST_SUCCESS;
 }
@@ -142,9 +215,9 @@ TEST(pkg_auth_3_write) {
     size_t          size;
     void            *ret;
 
-    TEST_ASSERT(sockfd, "Server is not responding");
+    TEST_ASSERT(sockfd.fd, "Server is not responding");
     ret = pkg_build_auth(&size, -1, -1);
-    TEST_ASSERT(write(sockfd, ret, size) != 0,
+    TEST_ASSERT(mbedtls_ssl_write(&ssl, ret, size) != 0,
         "Cannot send package to the server");
     return TEST_SUCCESS;
 }
@@ -153,9 +226,9 @@ TEST(pkg_req_get_pkg_1_write) {
     void        *ret;
     size_t      size;
 
-    TEST_ASSERT(sockfd, "Server is not responding");
+    TEST_ASSERT(sockfd.fd, "Server is not responding");
     ret = pkg_build_req_get_pkg(&size, 0, PKG_STABLE, "", "", "");
-    TEST_ASSERT(write(sockfd, ret, size), "Cannot send package to the server");
+    TEST_ASSERT(mbedtls_ssl_write(&ssl, ret, size), "Cannot send package to the server");
     return TEST_SUCCESS;
 }
 
@@ -164,11 +237,11 @@ TEST(pkg_req_get_pkg_1_read) {
     prot_package_t   *pkg;
     size_t      r_n = 0, size;
 
-    TEST_ASSERT(sockfd, "Server is not responding");
+    TEST_ASSERT(sockfd.fd, "Server is not responding");
     expect = pkg_build_error(&size, ERR_MALFORMED_PACKET, "A packet send by the client is wrong");
     ret = malloc(2048);
 
-    READ_TIMEOUT(sockfd, ret, 2048, 1, r_n);
+    READ_TIMEOUT(&sockfd, &ssl, ret, 2048, 1, r_n);
     TEST_ASSERT_FMT(memcmp(ret, expect, size) == 0,
         "Expected package is wrong %s", print_package(expect, ret, size, r_n));
     pkg = read_pkg(ret);
@@ -182,9 +255,9 @@ TEST(pkg_req_get_pkg_2_write) {
     void        *ret;
     size_t      size;
 
-    TEST_ASSERT(sockfd, "Server is not responding");
+    TEST_ASSERT(sockfd.fd, "Server is not responding");
     ret = pkg_build_req_get_pkg(&size, 1, PKG_STABLE, "", "", "");
-    TEST_ASSERT(write(sockfd, ret, size), "Cannot send package to the server");
+    TEST_ASSERT(mbedtls_ssl_write(&ssl, ret, size), "Cannot send package to the server");
     return TEST_SUCCESS;
 }
 
@@ -196,13 +269,13 @@ TEST(pkg_req_get_pkg_2_read) {
     size_t      r_n = 0, size;
     char        *req;
 
-    TEST_ASSERT(sockfd, "Server is not responding");
+    TEST_ASSERT(sockfd.fd, "Server is not responding");
 
     ret = malloc(2048);
     asprintf(&req, "SELECT * FROM pkgs WHERE id = 1");
     mpm_database_exec(db, req, pkg_cb, &pkgs, &req);
     pkg = pkgs->member;
-    READ_TIMEOUT(sockfd, ret, 2048, 1, r_n);
+    READ_TIMEOUT(&sockfd, &ssl, ret, 2048, 1, r_n);
 
    ptr = pkg_build_resp_pkg(&size, pkg->id, pkg->sbu, pkg->inst_size,
         pkg->arch_size, pkg->state, pkg->name, pkg->category, pkg->version, pkg->description,
@@ -221,15 +294,14 @@ TEST(pkg_req_get_pkg_test_all) {
     void                *ret = NULL;
     size_t              r_n = 0, size;
 
-    (void)r_n;
-    TEST_ASSERT(sockfd, "Server is not responding");
+    TEST_ASSERT(sockfd.fd, "Server is not responding");
     mpm_database_exec(db, "SELECT * FROM pkgs", pkg_cb, &pkgs, (char **)NULL);
     list_for_each(pkgs, tmp, pkg) {
         ret = pkg_build_req_get_pkg(&size, pkg->id, PKG_STABLE, "", "", "");
-        TEST_ASSERT(write(sockfd, ret, size), "Cannot send package to the server");
+        TEST_ASSERT(mbedtls_ssl_write(&ssl, ret, size), "Cannot send package to the server");
         free(ret);
         ret = malloc(2048);
-        READ_TIMEOUT(sockfd, ret, 2048, 1, r_n);
+        READ_TIMEOUT(&sockfd, &ssl, ret, 2048, 1, r_n);
         ptr = pkg_build_resp_pkg(&size, pkg->id, pkg->sbu, pkg->inst_size,
             pkg->arch_size, pkg->state, pkg->name, pkg->category, pkg->version, pkg->description,
             pkg->archive, pkg->arch_hash, pkg->dependencies_arr_size,
@@ -244,8 +316,13 @@ TEST(pkg_req_get_pkg_test_all) {
 }
 
 TEST(cleanup_co) {
-    TEST_ASSERT(sockfd, "Server is not responding");
-    TEST_ASSERT(close(sockfd) != -1, "Cannot close socket");
+    TEST_ASSERT(sockfd.fd, "Server is not responding");
+    mbedtls_net_free(&sockfd);
+    mbedtls_x509_crt_free(&cacert);
+    mbedtls_ssl_free(&ssl);
+    mbedtls_ssl_config_free(&conf);
+    mbedtls_ctr_drbg_free(&ctr_drbg);
+    mbedtls_entropy_free(&entropy);
     return TEST_SUCCESS;
 }
 
